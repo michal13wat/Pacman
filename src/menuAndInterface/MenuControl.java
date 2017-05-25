@@ -58,10 +58,10 @@ public class MenuControl {
                 joinGameMenu();
             }
             break;
-            case "display_connected_players": {
-                displayConnectedClients();
-            }
-            break;
+            //case "display_connected_players": {
+            //    displayConnectedClients();
+            //}
+            //break;
         }
     }
     
@@ -249,7 +249,7 @@ public class MenuControl {
         }, "q" );
     }
     
-    private void displayConnectedClients() {
+    /*private void displayConnectedClients() {
         PackReceivedFromServer pack;
         
         //int players = game.playersAmount.value;
@@ -272,13 +272,13 @@ public class MenuControl {
         menu.addMenuOption("Waiting for: " + 0, null);
         menu.addMenuOption("player", null);
 
-        /*menu.addButtonPressOption("exitOnQ",()-> {
-                game.close();
-                return 1;
-            }, "q" );*/
-    }
+        //menu.addButtonPressOption("exitOnQ",()-> {
+        //        game.close();
+        //        return 1;
+        //    }, "q" );
+    }*/
 
-    private void displayConnectedClientsOld() {
+    /*private void displayConnectedClientsOld() {
         PackReceivedFromServer pack;
         while (Game.packReceivedFromServer == null);   // czekaj aż klient coś odbierze z serwera i dopiero to wypisz
         pack = Game.packReceivedFromServer;
@@ -310,7 +310,7 @@ public class MenuControl {
                 game.close();
                 return 1;
             }, "q" );
-    }
+    }*/
     
     Game game;
     ArrayList<Sprite> sprites = new ArrayList();

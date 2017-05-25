@@ -29,12 +29,16 @@ public class ServerThread extends Thread {
     public ServerThread() {
         threadNum = threadCnt;
         threadCnt++;
-        verifySendObject = new boolean[Server.getClientAmount()];
+        verifySendObject = new boolean[MyServer.getClientAmount()];
         for (int i = 0; i < verifySendObject.length; i++){
             verifySendObject[i] = false;
         }
     }
 
+    public ServerThread(SocketChannel socket, int port) {
+        //!!!!!!!!!!!
+    }
+    
     @Override
     public void run() {
         try
@@ -53,7 +57,7 @@ public class ServerThread extends Thread {
             }
             System.out.print("Podłączono klienta \n");
             connectedClients++;
-            if (connectedClients == Server.getClientAmount()){
+            if (connectedClients == MyServer.getClientAmount()){
                 System.out.print("Wszyscy klienci podłączeni - Naciśnij Enter aby rozpocząć grę\n");
                 setServerIntoLockMode();
             }
@@ -76,7 +80,10 @@ public class ServerThread extends Thread {
             ex.printStackTrace();
         }
     }
-
+    
+    public void stopThread() {
+        // !!!!!!!!!!!!!!!!!!!!!!!!!
+    }
 
     private void sendObject(SocketChannel sChannel, PackReceivedFromServer object) throws IOException
     {
@@ -102,7 +109,7 @@ public class ServerThread extends Thread {
     }
 
     // Jeśli obiekt został wysłany przez wyszystkie wątki, to wtedy ustaw kolejny do wysłania
-    public static synchronized void setObjToSend(PackReceivedFromServer objToSend) {
+    public static synchronized void setObjToSend(PackReceivedFromServer objToSend, byte[] bytesToSend) {
         if (isSent() || unlock){
             ServerThread.objToSend = objToSend;
             for (int i = 0; i < verifySendObject.length; i++){

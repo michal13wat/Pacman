@@ -2,6 +2,7 @@ package clientAndServer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by User on 2017-04-17.
@@ -13,8 +14,10 @@ import java.util.ArrayList;
 public class PackReceivedFromServer<T> implements Serializable {
     private String additionalInfo;
     private ArrayList<T> objectsList = new ArrayList<T>();          // główny element klasy!
+    private ArrayList<Integer> deletedList = new ArrayList<>();
     private ArrayList<String> connectedClients = new ArrayList<>();
     private int notConnectedClients = 0;
+    private Random randomizer = null;
 
     public PackReceivedFromServer(){
     }
@@ -25,6 +28,10 @@ public class PackReceivedFromServer<T> implements Serializable {
         this.connectedClients = connectedClients;
         this.notConnectedClients = notConnectedClients;
     }
+    
+    public void clear() {
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
 
     public void addObject(T obj){
         objectsList.add(obj);
@@ -33,12 +40,24 @@ public class PackReceivedFromServer<T> implements Serializable {
         objectsList.addAll(list);
     }
 
+    public void addDeletedList(ArrayList<Integer> list) {
+        deletedList.addAll(list);
+    }
+    
     public String getAdditionalInfo() {
         return additionalInfo;
     }
 
     public ArrayList<T> getObjectsList() {
         return objectsList;
+    }
+
+    public ArrayList<Integer> getDeletedList() {
+        return deletedList;
+    }
+    
+    public Random getRandomizer() {
+        return randomizer;
     }
 
     public void addConnectedClient(String name){

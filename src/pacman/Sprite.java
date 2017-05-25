@@ -7,25 +7,16 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 
 public class Sprite {
-    // An aggregation of all the values necessary
-    // to draw a single frame of a sprite.
+    // Zbiór wartości niezbędnych do tego, aby narysować pojedynczą klatkę.
     
     public Sprite(String src, double xat, double yat, int width, int height) {
-        // Draw a specific frame.
-        try {
+        // Rysowanie jednej klatki.
+        /*try {
             this.src = ImageIO.read(getClass().getResource(src));
         } catch (IOException i) {
             this.src = null;
-        }
+        }*/
         
-        this.xat = xat;
-        this.yat = yat;
-        this.width = width;
-        this.height = height;
-    }
-    
-    public Sprite(Image src, double xat, double yat, int width, int height) {
-        // Draw a specific frame.
         this.src = src;
         this.xat = xat;
         this.yat = yat;
@@ -33,8 +24,8 @@ public class Sprite {
         this.height = height;
     }
     
-    public Sprite(Image src) {
-        // Draw an entire image.
+    public Sprite(String src) {
+        // Rysowanie całego obrazka.
         this.src = src;
         this.xat = 0;
         this.yat = 0;
@@ -44,20 +35,20 @@ public class Sprite {
         this.height = icon.getIconHeight();
     }
     
-    Image src;
+    String src;
     double xat;
     double yat;
     int width;
     int height;
     
-    Image getSrc()
+    public String getSrc()
     {return src;}
-    double getXat()
+    public double getXat()
     {return xat;}
-    double getYat()
+    public double getYat()
     {return yat;}
-    int getWidth()
+    public int getWidth()
     {return width;}
-    int getHeight()
+    public int getHeight()
     {return height;}
 }

@@ -2,6 +2,7 @@
 package pacman;
 
 import clientAndServer.Client;
+import clientAndServer.PackReceivedFromServer;
 import clientAndServer.PackToSendToServer;
 import gameObjects.GameObject;
 import gameObjects.LabyrinthObject;
@@ -14,7 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import menuAndInterface.MenuControl;
 import static pacman.Game.ipString;
-import static pacman.Game.packReceivedFromServer;
+//import static pacman.Game.packReceivedFromServer;
 import static pacman.Game.playerNumber;
 import static pacman.Game.portString;
 
@@ -45,14 +46,12 @@ public class ClientGame extends Game {
         max_render_skip = 10;
         
         objectList = new ArrayList();
-        menuControl = new MenuControl(this);
-        keyboardControl = new KeyboardControl(this);
         
         // Klawiatura.
         keyboardControl.keyboardInit();
         keyboardControlRemote = new HashMap<>();
         // Sprite'y.
-        loadSprites();
+        preloadSprites();
         
         // Wątek klienta.
         String addressIP = Game.ipString.value;
@@ -212,6 +211,8 @@ public class ClientGame extends Game {
         System.out.println(i);
         return keyboardControl;
     }
+    
+    static volatile PackReceivedFromServer<GameObject> packReceivedFromServer;
     
     Client client;
     int clientId;

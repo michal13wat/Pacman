@@ -80,4 +80,8 @@ public class Client extends Thread {
     public synchronized void setObjToSendToServer(PackToSendToServer objToSendToServer) {
         this.objToSendToServer = objToSendToServer;
     }
+    
+    public void close() {
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
 }

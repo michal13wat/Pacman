@@ -191,7 +191,8 @@ public class LabyrinthObject extends GameObject implements Serializable {
                     height ++;
                 }
             }
-        
+            
+            width++;
             myCollisionMap = new boolean[width][height];
         } catch (IOException i) {
             myCollisionMap = new boolean[1][1];

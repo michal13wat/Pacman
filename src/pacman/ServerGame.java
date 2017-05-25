@@ -36,7 +36,7 @@ public class ServerGame extends Game {
         
         wrapperInit();
         
-        objectList = new ArrayList();
+        objectList = new ArrayList<>();
         menuControl = new MenuControl(this);
         keyboardControl = new KeyboardControl(this);
         
@@ -221,6 +221,10 @@ public class ServerGame extends Game {
     HashMap <Integer,Integer> playerNumbers;
     HashMap <Integer,String> playerNames;
     HashMap <Integer,Integer> playerCharacters;
+    
+    ArrayList<Integer> deletedIds = new ArrayList<>();
+    ArrayList<PackToSendToServer> arrayWithDataFromPlayers = new ArrayList<>();
+    PackReceivedFromServer<GameObject> packOutToClient;
     
     // Ten oryginalnie tu był dodany, ale potrzebny był też w ClientGame,
     // więc przeniosłem go po prostu do Game.

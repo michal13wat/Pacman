@@ -11,21 +11,27 @@ import java.io.Serializable;
  *  */
 
 public class PackToSendToServer implements Serializable {
+    private int playersId;
     private String playersName;
-    private String character;
+    private int character;
     private String pressedKey;
 
-    public PackToSendToServer(String playersName, String character, String pressedKey){
+    public PackToSendToServer(String playersName, int character, String pressedKey, int playersId){
         this.playersName = playersName;
         this.character = character;
         this.pressedKey = pressedKey;
+        this.playersId = playersId;
     }
 
+    public void setPlayersId(int playersId) {
+        this.playersId = playersId;
+    }
+    
     public void setPlayersName(String playersName) {
         this.playersName = playersName;
     }
 
-    public void setCharacter(String character) {
+    public void setCharacter(int character) {
         this.character = character;
     }
 
@@ -34,11 +40,15 @@ public class PackToSendToServer implements Serializable {
     }
 
 
+    public int getPlayersId() {
+        return playersId;
+    }
+    
     public String getPlayersName() {
         return playersName;
     }
 
-    public String getCharacter() {
+    public int getCharacter() {
         return character;
     }
 
