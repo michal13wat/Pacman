@@ -1,0 +1,92 @@
+
+Zmiany w wersji v0.5:
+
+- Doda³em nowy pakiet clientAndServer. S³u¿y on do komunikacji 
+  serwera z klientami. Tworz¹c komunikacjê klient - serwer 
+  robi³em to w osobnym projekcie. Po przeniesieniu tutaj
+  nie wiem dlaczego w serwerze nie dzia³a metoda odbieraj¹ca
+  dane od klientów...  (receiveObject).
+  
+- W projekcie na razie uruchamiam tylko serwer, a klienta jako
+  zewnêtrzn¹ aplikacjê, ¿eby ³atwiej by³o testowaæ.
+ 
+- Serwer jest uruchamiany w osobnym w¹tku (metoda startServer())
+
+- ogólnie moja koncepcja klienta i serwera jest taka, ¿e w momencie
+  klikniêcia Start  w podmenu Create Game. Uruchamiany jest serwer
+  i jeden klient lokalnie. Ten jeden klient od razu pod³¹cza siê
+  do serwera. Dalej serwer czeka na resztê klientów.
+  
+  
+- Jak na chwilê obecn¹ dzia³a Serwer (jako osobna aplikacja)?
+	* Po uruchomieniu czeka na zadan¹ liczbê klientów.
+	* Kiedy wszyscy klienci s¹ pod³¹czeni mo¿na rozpocz¹æ komunikacjê.
+	* W nieskoñczonej pêtli na przemian odbiera i wysy³a dane od
+	  wszystkich i do wszystkich klientów.
+	* Pomiêdzy operacj¹ odebrania i wys³ania danych uruchamiana jest
+	  symulacja przetwarzania danych i takich przetworzonych odes³anie
+	  do klienta.
+	* Symulacja polega na stworzeniu 4 obiektów (niby obiekty gry) 
+	  zmodyfikowanych danymi odebranymi od klienta
+	  dodaniu ich do listy i przes³aniu do klienta.
+	* Ka¿dy klient jest pod³¹czony na osobnym porcie
+	* Serwer nie zacznie wysy³ania / przetwarzania nowych danych
+	  wejœciowych dopóki poprzednio przetworzone dane, przygotowane
+	  do wys³ania nie zostan¹ wys³ane do wszystkich klientów.
+	UWAGA - je¿eli liczba zadeklarowanych klientów jest równa
+	  np. 4, a aktualnie pod³¹czonych jest np. 3, to, mo¿liwe 
+	  bêdzie wys³anie jednej paczki do tych 3 klientów.
+	  Kolejne bêd¹ mog³y byæ przesy³ane dopiero po pod³¹czeniu
+	  wszystkich klientów!!!
+	  
+	  
+- Jak na chwilê obecn¹ dzia³a Klient (jako osobna aplikacja)?
+	* Po uruchomieniu nale¿y podaæ numer gracza. (Numer portu jest
+	  numerem portu podanym na pocz¹tku + numerem gracza). 
+	  Ka¿dy gracz musi mieæ inny numer.
+	  Je¿eli liczba graczy zosta³a ustawiona na 4, to
+	  numery graczy musz¹ byæ: 0, 1, 2, 3
+	* W nieskoñczonej pêtli sprawdza czy przypadkiem nie ma czegoœ
+	  do wys³ania lub czy przypadkiem nie zosta³o coœ odebrane.
+	  Je¿eli jest coœ do wys³ania to zostaje to wys³ane, a je¿eli
+	  zosta³o coœ odebrane, to zostaje to wyœwietlone.
+	* W kliencie nowe dane do wys³ania pojawiaj¹ siê w momencie
+	  wpisania z klawiatury trzech danych:
+		Nazwy gracza, postaci, i nazwy wciœniêtego klawisza.
+		(Docelowo w grze klient sekwencyjnie co jakiœ tam doœæ krótki
+		czas powinien wys³aæ takie dane do serwera - niezale¿nie
+		czy zosta³o coœ naciœniête czy nie, bo ¿eby dane w kliencie
+		mog³y siê zaktualizowaæ, to musz¹ one zostaæ pobrane z serwera.
+		Dane z serwera pobierane s¹ tylko po wys³aniu do niego 
+		innych danych.)
+	* Dane wysy³ane do serwera: nazwa gracza, nazwa postaci jak¹ gra oraz
+		wciœniêty klawisz.
+	* Dane popierane z serwera: lista wszystkich obiektów gry, 
+		lista pod³¹czonych klientów, liczba niepod³¹czonych klientów
+		oraz jakieœ tam dodatkowe informacje - tak na wszelki wypadek.
+	* Powy¿sze dane przed wys³anie i po wys³aniu s¹ pakowane w specjalne
+		obiekty odpowiednio klas:
+			PackReceivedFromServer i
+			PackToSendToServer
+	* w kliencie jest kolejka tych "odebranych z serwera paczek", po to, ¿e
+	  podejrzewam, ¿e narysowanie tych wszystkich obiektów na mapie
+	  mo¿e chwilê trwaæ i ¿eby nie by³o takiej sytuacji, ¿e w³aœnie
+	  jest rysowana jeden stan gry, podczas gdy serwer wysy³a ju¿ kolejny.
+	  W praktyce (ju¿ w grze) taka kolejka z regu³y raczej nie powinna
+	  przekraczaæ d³ugoœci 2 elementów, choæ myœlê, ¿e czasem mo¿e siê, te¿
+	  zdarzyæ, ¿e bêdzie mia³a d³ugoœæ 3.
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	  

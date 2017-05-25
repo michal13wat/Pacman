@@ -1,0 +1,4 @@
+
+Zmiany w wersji v0.4.5:
+
+- Dodana funkcjonalność opcji StringInputOption w MenuObject, oraz wariant NumberInputOption.

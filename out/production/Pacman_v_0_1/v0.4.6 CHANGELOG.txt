@@ -1,0 +1,56 @@
+
+Zmiany w wersji v0.4.6:
+
+- znalaz³em bug-a: jak zderz¹ siê duszek z pacman-em, to znikaj¹ duszki
+  i pacman (wracaj¹ na pozycje startowe)
+- Przebudowane Menu:
+	Teraz struktura Menu wygl¹da tak:
+
+PACMAN
+	1) Single Player
+		a)	SINGLE Player
+				Character
+				Lives < 3 >
+				Ghosts < 4 >
+				Skirmish
+				Crazytown
+				Wide
+				Classic
+				BACK
+	2) Mulitplayer
+		a) Create Game
+				CREATE Game
+					Start
+					Character < "postaæ" >
+					Players Number <4> 		(2-4)
+					Name:					(jeszcze nie dzia³a)
+					Port: 8080
+					BACK
+		b) Join Game
+				JOIN Game
+					Join
+					IP: 192.168.1.14
+					Port: 8080
+					BACK
+	3) Exit
+	
+* Taka wersja menu wydaje mi siê logiczniejsza, 
+  jak macie inne pomys³y, to piszcie.
+
+
+Do zrobienia w wersji v.0.5 (do soboty postaram siê to zrobiæ):
+- wpisywanie nazwy gracza 
+- tworzenie nowej gry (serwera)
+- po wciœniêciu Start lub Join:
+		Waiting for x Players...
+		Connected:
+			- Jan
+			- Michal
+			
+		Gdzie: x to liczba niepod³¹czonych graczy
+
+- jak starczy czasu, to zacznê przenosiæ ca³¹ logikê gry na serwer 
+		
+		
+
+	

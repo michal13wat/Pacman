@@ -1,0 +1,16 @@
+Planowane zmiany w wersji v0.6.5:
+- komunikacja klient - serwer przy pomocy Socket (nie SocketChannel)
+- w dowolnym momencie serwer może komunikować się z klientami i 
+  odwrotnie (a nie dopiero jak wszyscy klienci są podłączeni)
+- wszyscy kliencie nadają na jednym  porcie i na drugim nasłuchują (przy serwer socket tak się da)
+- każdy klient będzie musiał mieć unikatowe ID
+- w momencie uruchomienia serwera odpalany jest jeden wątek nasłuchujący, na
+  podłączenie się klienta kolejny jest odpalany, gdy zostaną wykonane wszystkie instrukcje
+  odpalające poprzedni wątek
+- klientów teoretycznie może się podłączyć nieskończona ilość, choć można zrobić jakieś tam 
+  ograniczenie, aby w momencie podłączenia się wszystkich graczy pojawiał się ekran 
+  typu: Wszyscy gracze podłączeni. Naciśnij start, aby rozpocząć grę (u każdego gracza się
+  będzie coś takiego pojawiało i dowolny gracz może rozpocząć grę)
+  
+  
+  

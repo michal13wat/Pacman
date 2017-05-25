@@ -1,0 +1,18 @@
+
+Zmiany w wersji v0.1:
+
+- Nieznaczna zmiana struktury funkcji w Game (g³ównie rozdzielenie inicjalizacji miêdzy osobne funkcje).
+- Dodatkowe funkcje w strukturze GameObject (mniej skomplikowany drawSprite oraz nowy destroyEvent)
+
+- Labirynty przeniesione do innego folderu, ³adowane automatycznie przez Game.
+- Pierwsza linijka pliku labiryntu to jego oficjalna nazwa.
+- Wyœwietlanie podczas gry nazwy labiryntu, wyniku oraz pozosta³ych ¿yæ.
+- Poprawne skalowanie ekranu dla labiryntów szerszych ni¿ wy¿szych.
+
+- Nowa klasa, TextObject, i grafika czcionki.
+- Nowa klasa, MenuObject. Korzysta z TextObject, ma konfigurowaln¹ liczbê opcji (normalne, spinnery, lub ukryte, reaguj¹ce na klawisz).
+- Nowa klasa, IntWrapper, pomocnicza dla MenuObject (wymagana dla ustalania wartoœci spinnerów).
+
+- Animacje dla postaci Pacmana.
+- Wygrywanie/przegrywanie poziomu poprzez zebranie wszystkich kropek lub utratê ¿yæ.
+- Z³apanie przez duszka powoduje utratê kilku punktów.

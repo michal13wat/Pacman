@@ -1,0 +1,25 @@
+Doda³em klasy:
+	ServerConfiguration
+	GameConfiguration
+	
+Pozmienia³em trochê w g³ównej klasie.
+To co zmieni³em / doda³em w klasie g³ównej
+oznaczy³em tak:
+
+    // MB >
+    //Where the GUI is created:
+    JMenuBar menuBar;
+    JMenu menu, submenu;
+    JMenuItem menuItem;
+    JRadioButtonMenuItem rbMenuItem;
+    JCheckBoxMenuItem cbMenuItem;
+    // MB <
+	
+Ogólnie nie ogarniam tego co Janek napisa³, dlatego zrobi³em
+to po prostu osobno jako menu okienkowe.
+To wyœwietlanie tego menu te¿ trzeba trochê poprawiæ;
+	musia³em przesun¹æ ca³y "canvas" trochê w prawo,
+	bo jak to nie jest przesuniête, to wtedy zas³ania
+	mi to menu dodane przeze mnie.
+	Na razie niech tak jest, jak bêdê mia³ czas, to spróbujê
+	to naprawiæ.

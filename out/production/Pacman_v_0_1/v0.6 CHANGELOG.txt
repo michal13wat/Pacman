@@ -1,0 +1,99 @@
+
+Zmiany w wersji v0.6:
+
+- lekko przebudowane menu - pododawa³em brakuj¹ce elementy w MULTIPLAYER, które by³y konieczne
+- kiedy jeszcze wszyscy klienci nie s¹ pod³¹czeni do serwera dzia³a on w trybie
+  "nieblokuj¹cym", tj. kolejne paczki z danymi mog¹ byæ rozsy³ane do pod³¹czonych klientów
+  niezale¿nie od tego czy zosta³y one ju¿ wys³ane do wszystkich czy nie. Po pod³¹czeniu
+  wszystkich klientów serwer prze³¹cza siê w tryb "blokuj¹cy", tj. dane do klientów
+  bêdzie wys³a³ dopiero, gdy wszyscy bêd¹ pod³¹czeni i poprzedni¹ paczkê rozes³a³ do 
+  wszystkich klientów.  
+- dzia³a ju¿ pod³¹czenie klientów do serwera (póki co tylko lokalnie - nawet mimo 
+  podania adresu IP). W konsoli (u klientów) jest wyœwietlane wszystko poprawnie,
+  ale w tym graficznym menu jest to wyœwietlane z opóŸnieniem "jednego gracza" 
+  (z wyj¹tkiem pierwszego), tzn. jak jest pod³¹czonych 3 graczy, to wyœwietlani s¹ 2, 
+  którzy pod³¹czyli siê jako pierwsi. Jest to spowodowane brakiem "odœwie¿alnego" z 
+  zewn¹trz menu.
+
+------------------------------------------------------------------------------------------
+  
+Jak wykorzystaæ "interfejs" klient - serwer:
+- polecam przeanalizowaæ metody startClient i startServer z klasy Game,
+  w sumie to tam jest "wyprowadzone na zewn¹trz" wszystko co powinno Was
+  interesowaæ (wys³anie i odbieranie).
+  
+Wysy³anie danych od klientów do serwera: 
+	W³aœciwie jest ju¿ zrobione.
+	W momencie naciœniêcia jakiegoœ klawisza u klienta jest on
+	zapamiêtywany i dodawany do bufora do wys³ania.
+	Wciœniête klawisze s¹ przesy³ane jako jeden string, np.: rd
+	znaczy ¿e zosta³ wciœniêty klawisze right (strza³ka w prawo) i down (strza³ka w dó³).
+	Prócz nazwy wciœniêtego klawisza dodatkowo jest przesy³ana nazwa gracza oraz nazwa
+	postaci (wybór postaci jeszcze nie dzia³a).
+
+	Jedyne co jest tu jeszcze do dokoñczenia, to zrobiæ, ¿eby jako wybrana postaæ faktycznie
+	by³ przesy³any string reprezentuj¹cy nazwê postaci (postaci nie gracza!), 
+	a nie zawsze "ZAŒLEPKA".
+	Nie zrobi³em tego dlatego, ¿e wybór postaci jeszcze tak nie do koñca dzia³a i nie 
+	potrafi³em tego naprawiæ.
+
+Przetwarzanie danych przez serwer:
+	arrayWithDataFromPlayers - g³ówny bufor serwera z danymi odebranymi od klientów. Na ka¿dej
+						   pozycji tablicy jest trzymany ostatni pakiet odebranymi
+						   od danego klienta. Gracze s¹ rozró¿niani na podstawie nazwy, 
+						   wiêc nie mo¿e byæ dwóch graczy z takimi samymi nazwami.
+	Ogólnie ca³a gra toczy siê na serwerze, a do klientów s¹ przesy³ane tylko obiekty
+	"wydmuszki".
+	W momencie rozpoczêcia gry w trybie multiplayer serwer powinien zacz¹æ analizowaæ
+	po koleji ca³¹ tablicê arrayWithDataFromPlayers i w zale¿noœci od tego który
+	gracz wcisn¹³ jaki przycisk, to powinien zmieniaæ kierunek ruchu tej postaci.
+	Po przetworzeniu tego powinien rozes³aæ to do wszystkich klientów.
+	
+Wysy³anie danych z serwera do klientów:
+	Przed wys³aniem wszystkie obiekty gry s¹ pakowane do specjalnej klasy 
+	(PackReceivedFromServer<>) i dopiero po spakowaniu w obiekt tej klasy
+	s¹ wys³ane.
+	Nie wiem dok³adnie co tu bêdzie trzeba przesy³aæ, ale wydaje mi siê, ¿e
+	chyba bêd¹ to obiekty klasy GameObject.
+	W takim przypadku definicje obiektów
+		private PackReceivedFromServer<TestObjectToSend> packOutToClient;
+		private static volatile PackReceivedFromServer<TestObjectToSend> packReceivedFromServer;
+	bêdzie trzeba zmieniæ na:
+		private PackReceivedFromServer<GameObject> packOutToClient;
+		private static volatile PackReceivedFromServer<GameObject> packReceivedFromServer;
+		
+Odbieranie i wyœwietlanie obiektów kliencie:
+	W kliencie analogicznie odwrotnie - aby wyœwietliæ przys³ane z serwera obiekty
+	najpierw trzeba je wypakowaæ z obiektu klasy PackReceivedFromServer i
+	dopiero wyœwietliæ.
+ 
+ 
+#######################################################################################
+  
+Co powinno zostaæ zrobione, a z czym sobie nie poradzi³em:
+- przy wyborze postaci mo¿na w menu wybraæ dowoln¹ postaæ, ale dzia³a, tylko 
+  Pacman i czerwony duszek... (mówiê tu o Single player)
+- przerobiæ metodê displayConnectedClients z klasy Game, tak ¿eby zamiast menu da³o siê
+  zrobiæ jakieœ takie "odœwie¿alne" z zewn¹trz Menu. Tzn. ¿eby jak ju¿ to zostanie
+  raz utworzone, ¿eby da³o siê dopisywaæ nowych graczy, wyœwietliæ jak¹ kto wybra³ postaæ
+  oraz ilu graczy z zadeklarowanych jest jeszcze niepod³¹czonych.
+- poza tym szukajcie w kodzie tagów TODO
+
+------------------------------------------------------------------------------------------
+  
+O czym zapomnia³em a dodam w kolejnej wersji:
+- wybór mapy w trybie multiplayer. Na razie niech na sztywno jest jakaœ tam jedna...
+
+
+
+Uwagai:
+- jak bêdziecie coœ zmieniaæ, i je¿eli te wypisy w konsoli bêd¹ Wam przeszkadza³y, to proszê
+  nie usuwajcie ich, tylko wykomentujcie, bo mo¿liwe, ¿e mi jeszcze bêd¹ potem potrzebne
+
+
+
+
+
+
+
+

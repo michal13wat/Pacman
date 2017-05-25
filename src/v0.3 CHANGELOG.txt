@@ -1,0 +1,6 @@
+
+Zmiany w wersji v0.3:
+
+-Zmiana poruszania się Pacmana (dodanie możliwości zawracania w trakcie pokonywania korytarza)
+-Dodanie możliwości sterowania jednym z duchów i wybierania ich liczby w menu
+-Dodanie że po złapaniu Pacmana przez któwrgoś duszka wszystkie wracają na swoje startpointy  

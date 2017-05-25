@@ -1,0 +1,10 @@
+
+Zmiany w wersji v0.4:
+
+- Poprawienie błędu z zawracaniem (nie można już "sunąć" bokiem ani iść na ukos).
+- Pokazywanie napisu "P1" nad aktualnym graczem, za pomocą nowej klasy PinnedTextObject.
+- Dodanie nowego rodzaju opcji do MenuObject - ImageSpinnerOption:
+    - Pod spodem to zwykły SpinnerOption.
+    - Do każdej wartości przypisany jest obrazek.
+    - Obrazki przechowywane są w ArrayList obiektów Sprite.
+- Niewielkie zmiany w organizacji menu gry.
