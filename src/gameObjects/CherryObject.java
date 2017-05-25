@@ -1,7 +1,10 @@
 
-package pacman;
+package gameObjects;
 
-public class CherryObject extends CollectibleObject
+import gameObjects.CollectibleObject;
+import java.io.Serializable;
+
+public class CherryObject extends CollectibleObject implements Serializable
 {
     @Override
     public void createEvent() {

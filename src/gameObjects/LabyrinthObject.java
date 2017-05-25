@@ -1,6 +1,13 @@
 
-package pacman;
+package gameObjects;
 
+import gameObjects.SpawnerObject;
+import menuAndInterface.TextObject;
+import gameObjects.NeutralizerObject;
+import gameObjects.PacmanObject;
+import gameObjects.GhostObject;
+import gameObjects.DotObject;
+import gameObjects.CherryObject;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -12,7 +19,7 @@ import java.util.ArrayList;
 import java.io.*;
 import javax.imageio.ImageIO;
 
-public class LabyrinthObject extends GameObject {
+public class LabyrinthObject extends GameObject implements Serializable {
     @Override
     public void createEvent() {
         x = 16;
@@ -25,10 +32,10 @@ public class LabyrinthObject extends GameObject {
     public void stepEvent() {
         if (sourceFile == null) return;
         
-        // Loading the stage.
+        // Ładowanie poziomu.
         if (counter == 0) labyrinthInit();
         
-        // Victory.
+        // Zwycięstwo.
         if ((game.getAllObjects(DotObject.class).isEmpty()) && (finished == false)) {
             finished = true;
             
@@ -40,10 +47,11 @@ public class LabyrinthObject extends GameObject {
                 o.scare(9999);
             }
             
-            ((PacmanObject)game.getObject(PacmanObject.class)).getCaught(null);
+            PacmanObject pacman = (PacmanObject)game.getObject(PacmanObject.class);
+            pacman.getCaught(null);
         }
         
-        // Exit.
+        // Wyjście.
         if (game.keyboardCheck("q")) {
             game.setPlayedGhostCreated(false);
             destroy();
@@ -64,11 +72,11 @@ public class LabyrinthObject extends GameObject {
             endDisplay.setText("");
             if (counter%10 >= 5) {
                 if (game.getAllObjects(DotObject.class).isEmpty()){
-                    if (game.isPacmanPlayed())endDisplay.setText("YOU WIN !!!");
+                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU WIN !!!");
                     else endDisplay.setText("YOU LOSE !!!");
-                } 
-                if (game.getLives() == 0) {
-                    if (game.isPacmanPlayed())endDisplay.setText("YOU LOSE !!!");
+                }
+                if (game.getLives() == 0) { ////////////////////// TUTAJ SIĘ ZAWIESZA(Ł) SERWER!!!!!!! ///////////////////////////////////////
+                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU LOSE !!!");
                     else endDisplay.setText("YOU WIN !!!");
                 }
             }
@@ -78,14 +86,14 @@ public class LabyrinthObject extends GameObject {
             g.setColor(Color.WHITE);
             for (int i = 0; i < width; i++){
                 for (int j = 0; j < height; j++) {
-                    if (collisionMap[i][j] == true) g.fillRect(x+sizeMod*i,y+sizeMod*j,16,16);
+                    if (myCollisionMap[i][j] == true) g.fillRect(x+sizeMod*i,y+sizeMod*j,16,16);
                 }
             }
         }
         else {
             for (int i = 0; i < width; i++){
                 for (int j = 0; j < height; j++) {
-                    if (collisionMap[i][j]) drawBlock(g,i,j,getFragmentLocations(i,j));
+                    if (myCollisionMap[i][j]) drawBlock(g,i,j,getFragmentLocations(i,j));
                 }
             }
         }
@@ -107,55 +115,64 @@ public class LabyrinthObject extends GameObject {
         game.gotoMenu("start");
     }
     
+    @Override
+    public boolean sendMe() {
+        if ((sent == false) && (sourceFile != null)) {
+            System.out.println("SERWER - MOŻNA PRZESŁAĆ LABIRYNT");
+            sent = true;
+            return true;
+        }
+        return false;
+    }
+    
     public boolean checkCollision(int x, int y) {
-        return (collisionMap[bounds(0,x,width-1)][bounds(0,y,height-1)]);
+        return (myCollisionMap[bounds(0,x,width-1)][bounds(0,y,height-1)]);
     }
     
     public boolean checkCollisionScaled(double x, double y) {
-        return (collisionMap
+        return (myCollisionMap
                 [bounds(0,(int)Math.floor(x/sizeMod),width-1)]
                 [bounds(0,(int)Math.floor(y/sizeMod),height-1)]);
     }
     
     private void labyrinthInit() {
-        // Loading the necessary files.
+        // Początkowe załadowanie labiryntu.
         try {
-            sizeInput(new FileInputStream(sourceFile));
-            layoutInput(new FileInputStream(sourceFile));
-        } catch (FileNotFoundException e) {
-            System.err.println("Error: File not found");
-            destroy();
-            return;
+            FileInputStream fi = game.loadLabyrinth(sourceFile);
+            if (fi == null) return;
+            sizeInput(fi);
+            fi.close();
+            
+            fi = game.loadLabyrinth(sourceFile);
+            if (fi == null) return;
+            layoutInput(fi);
+            fi.close();
         }
-
-        // Setting up the menu display.
+        catch (Exception e) {}
+        
+        // Ustawienie wyświetlaczy tesktu.
         nameDisplay = (TextObject)createObject(TextObject.class,width+1,0);
-        nameDisplay.loadFont("/resources/pac_font_sprites.png",8,8);
+        nameDisplay.loadFont("pac_font_sprites",8,8);
         nameDisplay.setText(labyrinthName);
         endDisplay = (TextObject)createObject(TextObject.class,width+1,3);
-        endDisplay.loadFont("/resources/pac_font_sprites.png",8,8);
+        endDisplay.loadFont("pac_font_sprites",8,8);
 
         scoreDisplay = (TextObject)createObject(TextObject.class,width+1,1);
-        scoreDisplay.loadFont("/resources/pac_font_sprites.png",8,8);
+        scoreDisplay.loadFont("pac_font_sprites",8,8);
         scoreDisplay.setPrefix("Score:");
         livesDisplay = (TextObject)createObject(TextObject.class,width+1,2);
-        livesDisplay.loadFont("/resources/pac_font_sprites.png",8,8);
+        livesDisplay.loadFont("pac_font_sprites",8,8);
 
-        // Stage initiation.
-
+        // Inicjalizacja poziomu.
         game.setScore(0);
         game.setLives(game.getStartingLives());
+        game.chooseCharacter(true,0);
 
-        try {
-            tileset = ImageIO.read(getClass().getResource("/resources/pac_labyrinth_tileset.png"));
-        } catch (IOException i) {
-            tileset = null;
-        }
+        tileset = "pac_labyrinth_tileset";
     }
     
     private void sizeInput(InputStream in) {
-        // Allocating the 2D array.
-        
+        // Alokacja tablicy labiryntu.=
         int c, tmp_width = -1;
         width = -1;
         height = 1;
@@ -164,21 +181,21 @@ public class LabyrinthObject extends GameObject {
             while ((c = in.read()) != '\n') {/**/}
             
             while ((c = in.read()) != -1) {
-                // New character. 
+                // Nowy znak.
                 if (c != '\n') {
                     if (width == -1) tmp_width ++;
                 }
-                // New line.
+                // Nowa linia.
                 else {
                     if (width == -1) width = tmp_width;
                     height ++;
                 }
             }
         
-            collisionMap = new boolean[width][height];
+            myCollisionMap = new boolean[width][height];
         } catch (IOException i) {
-            collisionMap = new boolean[1][1];
-            collisionMap[0][0] = false;
+            myCollisionMap = new boolean[1][1];
+            myCollisionMap[0][0] = false;
         }
         
         try {
@@ -186,11 +203,12 @@ public class LabyrinthObject extends GameObject {
         } catch (IOException i) {
             return;
         }
+        
+        System.out.println("Labyrinth is " + width + " x " + height);
     }
     
     private void layoutInput(InputStream in) {
-        // Reading the labyrinth layout into the array.
-        
+        // Czytanie układu poziomu do tablicy.
         int c = 0;
         
         try {
@@ -199,25 +217,25 @@ public class LabyrinthObject extends GameObject {
             
             for (int j = 0; j < height; j++) {
                 for (int i = 0; i < width; i++) {
-                    // By default, the square is empty.
+                    // Domyślnie, każde pole jest puste.
                     c = in.read();
-                    collisionMap[i][j] = false;
+                    myCollisionMap[i][j] = false;
                     
                     switch (c)
                     {
-                        // Wall 
-                        case '0': collisionMap[i][j] = true;
+                        // Ściana 
+                        case '0': myCollisionMap[i][j] = true;
                         break;
                         
-                        // Small Point
+                        // Mały punkt
                         case '-': createObject(DotObject.class,i,j);
                         break;
                         
-                        // Neutralizer. 
+                        // Neutralizator duchów
                         case '+': createObject(NeutralizerObject.class,i,j);
                         break;
                         
-                        // Big Point Spawner 
+                        // Spawner wisienek
                         case '$': {
                             SpawnerObject o = (SpawnerObject)createObject(SpawnerObject.class,i,j);
                             o.setSpawner(CherryObject.class,1,600,450+450*j/height,true);
@@ -228,7 +246,7 @@ public class LabyrinthObject extends GameObject {
                         case '#': createObject(PacmanObject.class,i,j);
                         break;
                         
-                        // Ghost Spawner 
+                        // Spawner duchów
                         case '^': {
                             SpawnerObject o = (SpawnerObject)createObject(SpawnerObject.class,i,j);
                             o.setSpawner(GhostObject.class,game.getNumberOfGhosts(),100,60,false);
@@ -237,7 +255,7 @@ public class LabyrinthObject extends GameObject {
                     }
                 }
 
-                // The '\n' char.
+                // Nowa linia.
                 while (c != -1) {
                     if ((c = in.read()) == '\n') break;
                 }
@@ -282,8 +300,7 @@ public class LabyrinthObject extends GameObject {
     }
     
     private void drawBlock(Graphics2D g, int blockX, int blockY, ArrayDeque<Point> v) {
-        // A composite block made from 4 8x8 elements.
-        
+        // Tworzenie kompozytowego bloczka z czterech elementów 8x8.
         Point tmpPoint;
         int tilesetX, tilesetY;
         
@@ -294,7 +311,7 @@ public class LabyrinthObject extends GameObject {
                 tilesetY = tmpPoint.y;
 
                 g.drawImage(
-                    tileset,
+                    getSprites(tileset),
                     (int)(scaleMod*(x+sizeMod*(2*blockX+i)/2))+screenCenterX,
                     (int)(scaleMod*(y+sizeMod*(2*blockY+j)/2))+screenCenterY,
                     (int)(scaleMod*(x+sizeMod*(2*blockX+i+1)/2))+screenCenterX,
@@ -307,8 +324,7 @@ public class LabyrinthObject extends GameObject {
     
     @Override
     protected GameObject createObject(Class ourClass, int i, int j) {
-        // Calls upon the Game object.
-        
+        // Wzywa GameObject do tego.
         GameObject o = game.createObject(ourClass);
         
         o.setCollisionMap(this);
@@ -319,20 +335,20 @@ public class LabyrinthObject extends GameObject {
     }
     
     int width, height, sizeMod;
-    boolean collisionMap[][];
+    boolean myCollisionMap[][];
     
-    File sourceFile;
+    String sourceFile;
     String labyrinthName;
     
     TextObject nameDisplay = null;
     TextObject livesDisplay = null;
     TextObject scoreDisplay = null;
     TextObject endDisplay = null;
-    Image tileset;
+    String tileset;
     
     boolean finished = false;
     
-    public void setSource(File f) {
+    public void setSource(String f) {
         sourceFile = f;
         counter = 0;
     }

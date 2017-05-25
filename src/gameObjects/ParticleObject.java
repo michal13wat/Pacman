@@ -1,7 +1,9 @@
 
-package pacman;
+package gameObjects;
 
-public class ParticleObject extends ActiveObject {
+import java.io.Serializable;
+
+public class ParticleObject extends ActiveObject implements Serializable {
     
     @Override
     public void stepEvent() {
@@ -12,13 +14,22 @@ public class ParticleObject extends ActiveObject {
     }
     
     public void setParticle(String sourceImg, int imageWidth, int imageHeight, int imageIndex, int imageCount, double imageSpeed) {
-        loadSpriteSheet(sourceImg,imageWidth,imageHeight);
+        setSpriteSheet(sourceImg,imageWidth,imageHeight);
         
         this.subimageIndex = 0;
         
         this.imageIndex = imageIndex;
         this.imageCount = imageCount;
         this.imageSpeed = imageSpeed;
+    }
+    
+    @Override
+    public boolean sendMe() {
+        if (sent == false) {
+            sent = true;
+            return true;
+        }
+        return false;
     }
     
     private double imageSpeed;

@@ -1,10 +1,14 @@
 
-package pacman;
+package gameObjects;
 
+import java.io.Serializable;
+import gameObjects.LabyrinthObject;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import pacman.Game;
+import pacman.Sprite;
 
-abstract public class GameObject {
+abstract public class GameObject implements Serializable {
     public GameObject() {
         firstStep = true;
         visible = true;
@@ -19,6 +23,9 @@ abstract public class GameObject {
     
     abstract public void destroyEvent();
     
+    // Metoda określająca, czy mamy przesłać go przez serwer.
+    public boolean sendMe(){return true;}
+    
     public void setPlayed(){
         //Nop()
     }
@@ -28,7 +35,7 @@ abstract public class GameObject {
     }
     
     protected GameObject createObject(Class ourClass, int x, int y) {
-        // Calls upon the Game object.
+        // Wzywa do tego GameObject.
         
         GameObject o = game.createObject(ourClass);
         
@@ -70,11 +77,13 @@ abstract public class GameObject {
     
     protected void drawSprite(
             Graphics2D g, Sprite spr, int x, int y) {
-        drawSprite(g,spr.getSrc(),x,y,spr.getXat(),spr.getYat(),
+        drawSprite(g,getSprites(spr.getSrc()),x,y,spr.getXat(),spr.getYat(),
                      spr.getWidth(),spr.getHeight());
     }
     
     protected int depth = 0;
+    
+    protected int id = 0;
     
     protected int x, y, xstart, ystart;
     protected int xorigin, yorigin;
@@ -84,14 +93,28 @@ abstract public class GameObject {
     
     protected double scaleMod = 1;
     protected int screenCenterX = 0, screenCenterY = 0;
-    protected Game game;
+    protected transient Game game;
     
     protected boolean destroyed;
+    protected boolean disposable = false;
+    protected boolean sent = false;
     
-    protected LabyrinthObject collisionMap = null;
+    protected transient LabyrinthObject collisionMap = null;
+    
+    public Image getSprites(String name) {
+        return game.getSpriteSheet(name);
+    }
     
     public boolean isDestroyed() {
         return destroyed;
+    }
+    
+    public void dispose() {
+        disposable = true;
+    }
+    
+    public boolean isDisposable() {
+        return disposable;
     }
     
     public int getX() {
@@ -145,7 +168,14 @@ abstract public class GameObject {
         return depth;
     }
     
+    public void setGame(Game game) {
+        this.game = game;
+    }
+    
     public void setCollisionMap(LabyrinthObject collisionMap) {
         this.collisionMap = collisionMap;
     }
+    
+    public void setId(int x) {id = x;};
+    public int getId() {return id;};
 }

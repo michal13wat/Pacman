@@ -1,14 +1,15 @@
 
-package pacman;
+package gameObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GhostObject extends CharacterObject {
+public class GhostObject extends CharacterObject implements Serializable {
     @Override
     public void createEvent() {
         super.createEvent();
         
-        loadSpriteSheet("/resources/pac_ghost_sprites.png",16,16);
+        setSpriteSheet("pac_ghost_sprites",16,16);
         
         myColor = 0;
         imageIndex = 0;
@@ -21,12 +22,23 @@ public class GhostObject extends CharacterObject {
         
         scareCounter = 0;
         hiddenCounter = 35;
+        
+        // Walidacja koloru.
+        
+        ArrayList<GameObject> allGhosts = game.getAllObjects(this.getClass());
+        GhostObject otherGhost = null;
+        
+        for (int i = 0; i < allGhosts.size(); i++) {
+            otherGhost = (GhostObject)allGhosts.get(i);
+            if ((otherGhost != this) && (otherGhost.myColor == myColor)) myColor ++;
+        }
     }
     
     @Override
     public void setPlayed(){
-        if (!game.isPlayedGhostCreated() && !game.isPacmanPlayed()) {
+        if (game.getGhostPlayer(myColor) >= 0) {
             isPlayed = true;
+            playerId = game.getGhostPlayer(myColor);
             game.setPlayedGhostCreated(true);
             createPin("P1");
         }
@@ -37,21 +49,11 @@ public class GhostObject extends CharacterObject {
     public void stepEvent() {
         if (firstStep){
             resetPosition();
-            
-            // Color validation.
-
-            ArrayList<GameObject> allGhosts = game.getAllObjects(this.getClass());
-            GhostObject otherGhost = null;
-
-            for (int i = 0; i < allGhosts.size(); i++) {
-                otherGhost = (GhostObject)allGhosts.get(i);
-                if ((otherGhost != this) && (otherGhost.myColor == myColor)) myColor ++;
-            }
         }
         
         if (isPlayed) stepControl();
         
-        // Scared/Hidden counter.
+        // Liczniki ukrycia / przestraszenia.
         
         if (scareCounter > 0) {
             imageIndex = 4;
@@ -66,7 +68,7 @@ public class GhostObject extends CharacterObject {
             hiddenCounter --;
             if (hiddenCounter == 34) {
                 ParticleObject o = (ParticleObject)createObject(ParticleObject.class,xstart,ystart);
-                o.setParticle("/resources/pac_particle_sprites.png",16,16,2,8,0.2);
+                o.setParticle("pac_particle_sprites",16,16,2,8,0.2);
                 o.setDepth(-10);
             }
             else if (hiddenCounter == 0) resetPosition();
@@ -76,7 +78,7 @@ public class GhostObject extends CharacterObject {
             tangible = true;
         }
         
-        // Catching PacMan.
+        // Łapanie PacMana.
         
         if (tangible) {
             PacmanObject obj;
@@ -114,7 +116,7 @@ public class GhostObject extends CharacterObject {
         hiddenCounter = 100;
         
         ParticleObject o = (ParticleObject)createObject(ParticleObject.class,x,y);
-        o.setParticle("/resources/pac_particle_sprites.png",16,16,1,7,0.2);
+        o.setParticle("pac_particle_sprites",16,16,1,7,0.2);
         o.setDepth(-2);
     }
     /*

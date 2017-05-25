@@ -1,16 +1,19 @@
 
-package pacman;
+package gameObjects;
 
+import gameObjects.DotObject;
+import gameObjects.CollectibleObject;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class PacmanObject extends CharacterObject {
+public class PacmanObject extends CharacterObject implements Serializable {
     @Override
     public void createEvent() {
         super.createEvent();
         
-        loadSpriteSheet("/resources/pac_hero_sprites.png",16,16);
+        setSpriteSheet("pac_hero_sprites",16,16);
         
         imageIndex = 0;
         subimageIndex = 0;
@@ -26,20 +29,21 @@ public class PacmanObject extends CharacterObject {
     
     @Override
     public void setPlayed(){
-        if (game.isPacmanPlayed()) {
+        if (game.getPacmanPlayer() >= 0) {
             isPlayed = true;
-            createPin("P1");
+            playerId = game.getPacmanPlayer();
+            //createPin("P1");
         }
         else isPlayed = false;
     }
     
     @Override
     public void stepEvent() {
-        // Kickstarting velocity.
+        // Rozruszanie z bezruchu.
             
         if (isPlayed) stepControl();
         
-        // Animation.
+        // Animacja.
         
         if ((xspeed + yspeed != 0)
         && (!collisionCheck(x+(int)Math.signum(xspeed),y+(int)Math.signum(yspeed)))) {
@@ -51,7 +55,7 @@ public class PacmanObject extends CharacterObject {
             imageIndex = approach(imageIndex,0,0.2);
         }
         
-        // Hiding after death and flicker control.
+        // Ukrywanie się po śmierci i "mryganie".
         
         if (hiddenCounter > 0) {
             xspeed = 0;
@@ -64,7 +68,7 @@ public class PacmanObject extends CharacterObject {
             if ((hiddenCounter == 40) && (game.getLives() > 0) && 
                     (!game.getAllObjects(DotObject.class).isEmpty())) {
                 ParticleObject o = (ParticleObject)createObject(ParticleObject.class,xstart,ystart);
-                o.setParticle("/resources/pac_particle_sprites.png",16,16,4,7,0.15);
+                o.setParticle("pac_particle_sprites",16,16,4,7,0.15);
                 o.setDepth(-10);
             }
             else if (hiddenCounter == 0) resetPosition();
@@ -80,7 +84,7 @@ public class PacmanObject extends CharacterObject {
             visible = true;
         }
         
-        // Collecting dots.
+        // Zbieranie kulek.
         
         CollectibleObject obj;
         
@@ -102,7 +106,7 @@ public class PacmanObject extends CharacterObject {
             hiddenCounter = 150;
         
             ParticleObject o = (ParticleObject)createObject(ParticleObject.class,x,y);
-            o.setParticle("/resources/pac_particle_sprites.png",16,16,3,11,0.25);
+            o.setParticle("pac_particle_sprites",16,16,3,11,0.25);
             o.setDepth(-10);
 
             game.addScore(-10);
@@ -112,7 +116,7 @@ public class PacmanObject extends CharacterObject {
             hiddenCounter = 250;
             
             ParticleObject o = (ParticleObject)createObject(ParticleObject.class,x,y);
-            o.setParticle("/resources/pac_particle_sprites.png",16,16,5,8,0.14);
+            o.setParticle("pac_particle_sprites",16,16,5,8,0.14);
             o.setDepth(-10);
         }
     }

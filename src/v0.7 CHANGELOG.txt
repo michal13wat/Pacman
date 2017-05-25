@@ -1,0 +1,53 @@
+
+Zmiany w wersji 0.7:
+
+///////////////////////////////////////////////////////////////////////////////
+
+- Większa ilość klas została rozdzielona między paczkami:
+    "pacman" - klasa gry i podstawowe klasy pomocnicze oraz abstrakcyjne,
+    "menuAndInterface" - klasy kontrolujące menu i wyświetlanie tekstu,
+    "gameObjects" - to wszystko, co widać podczas gry.
+
+- Dodana wartość ID do PackToSendToServer, żeby można było mieć kilku
+  graczy o takim samym nicku.
+
+- Ustawienia Menu z klasy Game przeniesione do MenuControl,
+  a sprawy z klawiaturą - do KeyboardControl. Jest też KeyboardControlRemote,
+  który to przechowuje inputy dla jednego gracza, i do którego można wrzucić
+  String otrzymany z serwera.
+
+- Stworzone nowe obiekty - ServerGame i ClientGame. Dziedziczą one po
+  Game, i służą do symulacji gry na serwerze/kliencie, i koordynacji wysyłania paczek.
+  Do nich wrzucona jest większa część ustawień serwerowych
+
+- Możliwość grania dowolną postacią (tzn. lokalnie). Teraz, w Game jest wrapper
+  characterChosen, który jest modyfikowany w Menu, ale sam w sobie nic nie znaczy.
+  Oprócz niego są pacmanPlayer i ghostPlayer[4], które oznaczają który gracz
+  gra daną postacią: -1 znaczy, że AI, 0 - że gracz lokalny, >0 - że podłączony klient.
+
+- Polskie komentarze.
+
+///////////////////////////////////////////////////////////////////////////////
+
+- Co jeszcze nie działa:
+
+  Serwer zżera bardzo, ale to BARDZO dużo pamięci. Często w ogóle laguje,
+  i przez N+ sekund klienci są pozostawieni samym sobie...
+
+  Nie ma żadnego "Lobby" dla graczy - dlatego, że w ogóle nie można wysyłać
+  obiektów MenuObject, które mają >0 Callable i/lub Wrappery w sobie. Nie
+  wiem, dlaczego tak jest, chyba trzeba będzie po prostu zrobić jakieś
+  "aktualizowalne" menu (ale to później).
+
+  Na razie każdy gracz jest PacManem, nie można wybrać postaci (to trzeba
+  załatwić po stronie klienta. Nie ma też żadnego ekranu zwycięstwa.
+
+  Trzeba też będzie zrobić (to akurat łatwe), żeby serwer odsyłał graczom
+  input wszystkich innych graczy, i niezbędne wrappery - np. wynik w danym momencie.
+
+  Nie da się wyjść z serwera - trzeba dorobić jakąś metodę, która kasuje
+  wsystkie ServerGame/ClientGame i wątki, oraz obsługę zerwanego połączenia
+  na serwerze.
+
+  Z jakiegoś powodu, gra odpalona z .jar'a nie chce ładować plików labiryntów.
+  W związku z tym nie mam pojęcia, czy to działa inaczej niż lokalnie.

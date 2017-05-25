@@ -1,15 +1,20 @@
 
-package pacman;
+package menuAndInterface;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import gameObjects.GameObject;
+import java.io.Serializable;
+import pacman.IntWrapper;
+import pacman.Sprite;
+import pacman.StringWrapper;
 
-public class MenuObject extends GameObject {
+public class MenuObject extends GameObject implements Serializable {
     private boolean hiddenPrefix = false;
 
-    private class MenuOption {
-        // Private class for different options.
+    private class MenuOption implements Serializable {
+        // Konkretna funkcja do odegrania.
         
         public void setMenuOption(String name, Callable function) {
             this.name = name;
@@ -21,15 +26,15 @@ public class MenuObject extends GameObject {
         }
         
         protected String name;
-        protected Callable function;
+        protected transient Callable function;
         
         public Callable getFunction() {
             return function;
         }
     }
 
-    private class ButtonPressOption extends MenuOption {
-        // Activated upon pressing a button.
+    private class ButtonPressOption extends MenuOption implements Serializable {
+        // Funkcja odgrywana przy wciśnięciu przycisku.
         
         public void setMenuOption(String name, Callable function, String button) {
             super.setMenuOption(name, function);
@@ -43,14 +48,13 @@ public class MenuObject extends GameObject {
         protected String button;
     }
     
-    private class StringInputOption extends MenuOption {
-        // Modifies a tied string.
+    private class StringDisplayOption extends MenuOption implements Serializable {
+        // Wyświetlanie String'a.
         
-        public void setMenuOption(String name, Callable function, StringWrapper value, String regex, int limit) {
+        public void setMenuOption(String name, Callable function, StringWrapper value, String regex) {
             super.setMenuOption(name, function);
             this.value = value;
             this.regex = regex;
-            this.limit = limit;
         }
         
         public StringWrapper getWrapper() {
@@ -88,6 +92,20 @@ public class MenuObject extends GameObject {
             return l;
         }
         
+        protected String regex;
+        protected StringWrapper value;
+    }
+    
+    private class StringInputOption extends StringDisplayOption implements Serializable {
+        // Modyfikacja String'a.
+        
+        public void setMenuOption(String name, Callable function, StringWrapper value, String regex, int limit) {
+            super.setMenuOption(name, function);
+            this.value = value;
+            this.regex = regex;
+            this.limit = limit;
+        }
+        
         public int getLimit() {
             return limit;
         }
@@ -99,13 +117,11 @@ public class MenuObject extends GameObject {
                 || ((c >= '0') && (c <= '9')));
         }
         
-        protected StringWrapper value;
-        protected String regex;
         protected int limit;
     }
     
-    private class NumberInputOption extends StringInputOption {
-        // A similar option, but this one only accepts numbers.
+    private class NumberInputOption extends StringInputOption implements Serializable {
+        // To samo, ale tylko z numerami.
         
         @Override
         public boolean canAcceptChar(char c) {
@@ -113,8 +129,8 @@ public class MenuObject extends GameObject {
         }
     }
     
-    private class SpinnerOption extends MenuOption {
-        // Changing the value of a variable.
+    private class SpinnerOption extends MenuOption implements Serializable {
+        // Zmienianie wartości liczbowej zmiennej.
         
         public void setMenuOption(String name, Callable function, IntWrapper value, int lbound, int rbound) {
             super.setMenuOption(name, function);
@@ -144,8 +160,8 @@ public class MenuObject extends GameObject {
         protected int leftBound, rightBound;
     }
     
-    private class ImageSpinnerOption extends SpinnerOption {
-        // A spinner with an image attributed to each option.
+    private class ImageSpinnerOption extends SpinnerOption implements Serializable {
+        // To samo, ale z obrazkiem na każdą liczbę.
         
         public void setMenuOption(String name, Callable function, IntWrapper value,
                 int lbound, int rbound, ArrayList<Sprite> sprites) {
@@ -165,7 +181,7 @@ public class MenuObject extends GameObject {
         }
         
         public int getMaxWidth(){
-            // Very important method.
+            // Bardzo ważna metoda.
             int maxWidth = 0;
             for (Sprite sprite : sprites) {
                 if (sprite.getWidth() > maxWidth)
@@ -176,7 +192,7 @@ public class MenuObject extends GameObject {
         }
         
         public int getMaxHeight(){
-            // Likewise.
+            // Także samo.
             int maxHeight = 0;
             for (Sprite sprite : sprites) {
                 if (sprite.getHeight() > maxHeight)
@@ -194,38 +210,44 @@ public class MenuObject extends GameObject {
         myOptions = new ArrayList();
         hiddenOptions = new ArrayList();
         menuTitle = null;
+        visible = false;
         depth = -50;
     }
     
     @Override
     public void stepEvent() {
-        // Option control.
+        if (firstStep == true) {
+            visible = true;
+            firstStep = false;
+        }
+        
+        // Kontrola opcji.
         MenuOption m = myOptions.get(cursorPos);
         
-        // Keyboard input.
+        // Wejście z klawiatury.
         if (m instanceof StringInputOption) {
             StringInputOption oo = (StringInputOption)m;
             StringWrapper s = oo.getWrapper();
             char c = game.keyboardCharCheck();
-            // Deleting and adding characters.
+            // Usuwanie i dodawanie znaków.
             if ((game.keyboardCheck("backspace")) && !(game.keyboardHoldCheck("backspace")) && (s.value.length() > 0))
                 s.value = s.value.substring(0,s.value.length()-1);
             else if ((c != 0) && (oo.canAcceptChar(c)) && (s.value.length() < oo.getLimit()))
                 s.value += c;
         }
         
-        // Choosing an option with Enter.
+        // Wybór opcji za pomocą Enter.
         if ((game.keyboardCheck("enter")) && (!game.keyboardHoldCheck("enter")) && (counter > 0)) select(m);
         else if ((game.keyboardCheck("left")) && (!game.keyboardHoldCheck("left"))) {
-            // Decreasing spinner value with left.
+            // Zmniejszanie wartości Spinnera w lewo..
             if (m instanceof SpinnerOption) ((SpinnerOption)m).addValue(-1);
         }
         else if ((game.keyboardCheck("right")) && (!game.keyboardHoldCheck("right"))) {
-            // Increasing spinner value with right.
+            // Zwiększanie wartości Spinnera w prawo..
             if (m instanceof SpinnerOption) ((SpinnerOption)m).addValue(1);
         }
         else if ((game.keyboardCheck("up")) && (!game.keyboardHoldCheck("up"))) {
-            // Changing options with up/down.
+            // Zmiana pozycji z góra/dół.
             cursorPos --;
             if (cursorPos < 0) cursorPos += myOptions.size();
         }
@@ -234,7 +256,7 @@ public class MenuObject extends GameObject {
             cursorPos = (cursorPos+1)%myOptions.size();
         }
         
-        // Hidden option checking.
+        // Ukryte opcje.
         for (int i = 0; i < hiddenOptions.size(); i ++) {
             MenuOption o = hiddenOptions.get(i);
             if ((o instanceof ButtonPressOption)
@@ -255,21 +277,21 @@ public class MenuObject extends GameObject {
     public void drawEvent(Graphics2D g) {
         MenuOption o = null;
         
-        // Setting up the TextObject.
+        // Ustawienia TextObject.
         if (renderer == null) {
             renderer = (TextObject)createObject(TextObject.class,x,y);
             renderer.loadFont(fontSource,fontWidth,fontHeight);
         }
         
-        // And one for the optional title.
+        // I jeden dla opcjonalnego tytułu menu.
         if (menuTitle != null) {
             renderer.setPrefix(" ");
             renderer.setText(menuTitle);
             renderer.setPosition(x,y-fontHeight);
-            renderer.drawEvent(g);
+            renderer.forceDraw(scaleMod,screenCenterX,screenCenterY,g);
         }
         
-        // Drawing each option.
+        // Rysowanie każdej opcji.
         int height = 0;
         for (int i = 0; i < myOptions.size(); i ++) {
             o = myOptions.get(i);
@@ -277,7 +299,7 @@ public class MenuObject extends GameObject {
         }
     }
     
-    // Public methods for adding new options:
+    // Dodawanie nowych opcji:
     
     public void addMenuOption(String name, Callable newFunction) {
         MenuOption o = new MenuOption();
@@ -289,6 +311,12 @@ public class MenuObject extends GameObject {
         ButtonPressOption o = new ButtonPressOption();
         o.setMenuOption(name,newFunction,button);
         hiddenOptions.add(o);
+    }
+
+    public void addStringDisplayOption(String name, Callable newFunction, StringWrapper value, String regex) {
+        StringDisplayOption o = new StringDisplayOption();
+        o.setMenuOption(name,newFunction,value,regex);
+        myOptions.add(o);
     }
 
     public void addStringInputOption(String name, Callable newFunction, StringWrapper value, String regex, int limit) {
@@ -317,19 +345,19 @@ public class MenuObject extends GameObject {
     }
     
     private int drawOption(Graphics2D g, MenuOption o, int i, int height) {
-        // Moved here to shorten functions.
-        // Returns height at which to draw next one.
+        // Przesunięte tutaj, w celu skrócenia funkcji.
+        // Zwraca pozycję y, na której trzeba narysować kolejną opcję.
         int newHeight = height;
         renderer.setPostfix("");
             
         if (o instanceof SpinnerOption) {
-            // Drawing the spinner arrows.
+            // Strzałki Spinnerów.
             SpinnerOption so = (SpinnerOption)o;
             String s = "";
             if ((so.spinnerFull("left")) || (cursorPos != i)) s += " ";
             else s += "<";
 
-            // Leaving space for the optional image.
+            // Zostawiamy miejsce na ewentualny obrazek.
             if (o instanceof ImageSpinnerOption) {
                 ImageSpinnerOption oo = (ImageSpinnerOption)o;
                 height += (oo.getMaxHeight()-fontHeight)/2;
@@ -344,9 +372,10 @@ public class MenuObject extends GameObject {
 
             renderer.setPostfix(s);
         }
-        else if (o instanceof StringInputOption) {
-            // Drawing the input string.
-            StringInputOption io = (StringInputOption)o;
+        else if ((o instanceof StringInputOption)
+             || (o instanceof StringDisplayOption)) {
+            // String do modyfikacji.
+            StringDisplayOption io = (StringDisplayOption)o;
             String s = io.getStringWithRegex();
             
             if ((counter%20 < 10) && (cursorPos == i)) s = s + "_";
@@ -354,15 +383,15 @@ public class MenuObject extends GameObject {
             renderer.setPostfix(s);
         }
 
-        // Selected arrow.
+        // Strzałka wyboru opcji.
         if (cursorPos == i && !hiddenPrefix) renderer.setPrefix("> ");
         else renderer.setPrefix("  ");
-
+        
         renderer.setText(o.getName());
         renderer.setPosition(x,y+height);
-        renderer.drawEvent(g);
+        renderer.forceDraw(scaleMod,screenCenterX,screenCenterY,g);
 
-        // Spinner images.
+        // Obrazki do spinnera.
         if (o instanceof ImageSpinnerOption) {
             ImageSpinnerOption oo = (ImageSpinnerOption)o;
             drawSprite(g,oo.getCurrentSprite(),

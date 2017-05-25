@@ -1,18 +1,19 @@
 
-package pacman;
+package gameObjects;
 
 import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Image;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
-abstract public class ActiveObject extends GameObject {
+abstract public class ActiveObject extends GameObject implements Serializable {
     @Override
     public void createEvent(){
-        // Variable initialization.
+        // Inicjalizacja zmiennych.
         tangible = true;
         visible = true;
         
@@ -76,18 +77,12 @@ abstract public class ActiveObject extends GameObject {
         //
     }
     
-    public void loadSpriteSheet(String source, int imageWidth, int imageHeight) {
-        // Changes the destination spritesheet.
-        
+    public void setSpriteSheet(String name, int imageWidth, int imageHeight) {
+        // Zmienia wyznaczony zestaw sprite'ów.
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         
-        try {
-            spriteSheet = ImageIO.read(getClass().getResource(source));
-        }
-        catch (IOException i) {
-            spriteSheet = null;
-        }
+        this.spriteSheet = name;
         
         bboxLeft = 0;
         bboxRight = imageWidth;
@@ -96,12 +91,12 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected void drawSpriteFull(Graphics2D g) {
-        drawSprite(g,spriteSheet,x,y,subimageIndex,imageIndex,imageWidth,imageHeight);
+        drawSprite(g,getSprites(spriteSheet),x,y,subimageIndex,imageIndex,imageWidth,imageHeight);
     }
         
     protected void drawSpriteChopped(Graphics2D g, int x, int y, int x1, int y1, int x2, int y2) {
         g.drawImage(
-            spriteSheet,
+            getSprites(spriteSheet),
             (int)(scaleMod*(x+xorigin))+screenCenterX,
             (int)(scaleMod*(y+yorigin))+screenCenterY,
             (int)(scaleMod*(x+x2-x1+xorigin))+screenCenterX,
@@ -112,8 +107,8 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected ActiveObject getColliding(Class ourClass) {
-        // Returns an ActiveObject of the argument class that we're colliding with.
-        // If there are none, returns null.
+        // Zwraca ActiveObject, z którym w tej chwili kolidujemy.
+        // Jeśli nie ma żadnego, zwraca null.
         
         ArrayList<GameObject> l = game.getAllObjects(ourClass);
         ActiveObject obj;
@@ -127,8 +122,8 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected boolean collisionCheck(int xcheck, int ycheck) {
-        // Simple square collision check, based on imageWidth/imageHeight.
-        // Not very precise.
+        // Sprawdzanie kolizji, bazowane na zmiennych bbox.
+        // Niezbyt precyzyjne.
         
         if ((wallContact == false) || (collisionMap == null)) return false;
         
@@ -153,7 +148,7 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected boolean collisionCheck(ActiveObject other) {
-        // Geometric test for collision with another object.
+        // Sprawdzanie kolizji z innymi obiektami.
         
         if ((other == null) || (other == this)) return false;
         
@@ -168,8 +163,8 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected void moveObject() {
-        // General movement code.
-        // Avoids non-integer position.
+        // Generalny kod do ruchu.
+        // Unika nie-całkowitych pozycji.
         
         openOnLeft = !collisionCheck(x-1,y);
         openOnTop = !collisionCheck(x,y-1);
@@ -213,8 +208,7 @@ abstract public class ActiveObject extends GameObject {
     }
     
     protected int wraparound(int coord, boolean isVertical) {
-        // This one returns a "wrapped" coordinate, so that it
-        // never goes outside the map.
+        // Zwraca koordynaty "owinięte" wokół brzegów mapy.
         
         if ((wraparoundEnabled == true) && (collisionMap != null)) {
             if (isVertical) {
@@ -238,7 +232,7 @@ abstract public class ActiveObject extends GameObject {
         //
     }
     
-    Image spriteSheet;
+    String spriteSheet;
     protected double imageIndex, subimageIndex;
     protected int imageWidth, imageHeight;
     protected int bboxLeft, bboxRight, bboxTop, bboxBottom;

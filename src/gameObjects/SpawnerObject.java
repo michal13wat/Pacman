@@ -1,12 +1,13 @@
 
-package pacman;
+package gameObjects;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class SpawnerObject extends ActiveObject {
-    // Class spawns certain ActiveObject with set delay.
+public class SpawnerObject extends ActiveObject implements Serializable {
+    // Spawnuje konkretny ActiveObject po upłynięciu pewnego czasu.
     
     @Override
     public void createEvent() {
@@ -43,7 +44,7 @@ public class SpawnerObject extends ActiveObject {
     
     @Override
     public void drawEvent(Graphics2D g) {
-        // No drawing.
+        // Nic nie rysujemy.
     }
     
     public void setSpawner(Class spawnedObject, int maximumObjects, int interval, int delay, boolean blockable) {
@@ -52,6 +53,15 @@ public class SpawnerObject extends ActiveObject {
         this.interval = interval;
         this.delay = delay;
         this.blockable = blockable;
+    }
+    
+    @Override
+    public boolean sendMe() {
+        if (sent == false) {
+            sent = true;
+            return true;
+        }
+        return false;
     }
     
     private Class spawnedObject;

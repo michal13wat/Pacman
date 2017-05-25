@@ -1,14 +1,16 @@
 
-package pacman;
+package gameObjects;
 
-abstract public class CollectibleObject extends ActiveObject
+import java.io.Serializable;
+
+abstract public class CollectibleObject extends ActiveObject implements Serializable
 {
     @Override
     public void createEvent()
     {
         super.createEvent();
         
-        loadSpriteSheet("/resources/pac_collectible_sprites.png",16,16);
+        setSpriteSheet("pac_collectible_sprites",16,16);
         
         bboxLeft = 6;
         bboxRight = 10;
@@ -21,16 +23,17 @@ abstract public class CollectibleObject extends ActiveObject
     
     @Override
     public void stepEvent() {
+        firstStep = false;
         // Memory savin'
     }
     
     public void getCollected(CharacterObject obj) {
-        // Update score.
+        // Aktualizacja wyniku.
         game.addScore(pointReward);
         
         ParticleObject o = (ParticleObject)createObject(ParticleObject.class,x,y);
         
-        o.setParticle("/resources/pac_particle_sprites.png",16,16,0,4,0.6);
+        o.setParticle("pac_particle_sprites",16,16,0,4,0.6);
         o.setDepth(-1);
         
         destroy();

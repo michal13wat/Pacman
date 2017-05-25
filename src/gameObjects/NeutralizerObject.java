@@ -1,9 +1,12 @@
 
-package pacman;
+package gameObjects;
 
+import gameObjects.GhostObject;
+import gameObjects.CollectibleObject;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class NeutralizerObject extends CollectibleObject {
+public class NeutralizerObject extends CollectibleObject implements Serializable {
     @Override
     public void createEvent() {
         super.createEvent();
@@ -21,10 +24,19 @@ public class NeutralizerObject extends CollectibleObject {
     }
     
     @Override
+    public boolean sendMe() {
+        if (sent == false) {
+            sent = true;
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     public void getCollected(CharacterObject obj) {
         super.getCollected(obj);
         
-        // Make all ghosts scared.
+        // Przestrasza wszystkie duchy.
         
         ArrayList<GameObject> l = game.getAllObjects(GhostObject.class);
         GhostObject o = null;
