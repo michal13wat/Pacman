@@ -437,7 +437,7 @@ public class Game extends Thread
     };
     
     protected void startClient(String addressIP, String port, int playerID){
-        clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
+        clientGame = new ClientGame(gameWindow,gameRenderer,playerName,chosenCharacter);
         clientGame.init();
     }
 

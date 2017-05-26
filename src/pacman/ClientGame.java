@@ -21,10 +21,11 @@ import static pacman.Game.portString;
 
 public class ClientGame extends Game {
     
-    public ClientGame(JFrame gameWindow, JPanel gameRenderer, StringWrapper playerName) {
+    public ClientGame(JFrame gameWindow, JPanel gameRenderer, StringWrapper playerName, IntWrapper chosenCharacter) {
         this.gameWindow = gameWindow;
         this.gameRenderer = gameRenderer;
         this.playerName = playerName;
+        this.chosenCharacter = chosenCharacter;
         //this.ipString = ipString;
         //this.portString = portString;
         //this.playerNumber = playerNumber;
@@ -61,6 +62,20 @@ public class ClientGame extends Game {
         
         globalCounter = 0;
         gameLoop();
+    }
+    
+    @Override
+    protected void wrapperInit() {
+        
+        startingLives = new IntWrapper(3);
+        playersAmount = new IntWrapper(4);
+        playerNumber = new IntWrapper(1);
+        isPacmanPlayed = new IntWrapper(0);
+        
+        pacmanPlayer = new IntWrapper(-1);
+        ghostPlayer = new IntWrapper[4];
+        for (int i = 0; i < 4; i++)
+            ghostPlayer[i] = new IntWrapper(-1);
     }
     
     @Override
@@ -114,7 +129,7 @@ public class ClientGame extends Game {
         
         name = playerName.value;
         // TODO - zrobić jak będzie działał wybór postaci
-        character = 0;
+        character = chosenCharacter.value;
         pressedKey = checkPressedKeys();
         System.out.println("KLIENT " + name + " " + pressedKey);
         

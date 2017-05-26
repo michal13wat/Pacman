@@ -166,7 +166,8 @@ public class LabyrinthObject extends GameObject implements Serializable {
         // Inicjalizacja poziomu.
         game.setScore(0);
         game.setLives(game.getStartingLives());
-        game.chooseCharacter(true,0);
+        if (game.chosenCharacter.value != -1)
+            game.chooseCharacter(true,0);
 
         tileset = "pac_labyrinth_tileset";
     }

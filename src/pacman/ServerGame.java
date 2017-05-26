@@ -69,6 +69,23 @@ public class ServerGame extends Game {
     }
     
     @Override
+    protected void wrapperInit() {
+        
+        playerName = new StringWrapper("SERVER");
+        chosenCharacter = new IntWrapper(-1);
+
+        startingLives = new IntWrapper(3);
+        playersAmount = new IntWrapper(4);
+        playerNumber = new IntWrapper(1);
+        isPacmanPlayed = new IntWrapper(0);
+
+        pacmanPlayer = new IntWrapper(-1);
+        ghostPlayer = new IntWrapper[4];
+        for (int i = 0; i < 4; i++)
+            ghostPlayer[i] = new IntWrapper(-1);
+    }
+    
+    @Override
     protected void gameLoop() {
         // Konsystentny FPS.
         double nextStep = System.currentTimeMillis();
