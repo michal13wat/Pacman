@@ -35,6 +35,7 @@ public class ServerGame extends Game {
         max_render_skip = 10;
         
         wrapperInit();
+        startingLives.value = 1000;
         
         objectList = new ArrayList<>();
         menuControl = new MenuControl(this);

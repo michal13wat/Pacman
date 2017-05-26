@@ -493,7 +493,7 @@ public class Game extends Thread
     
     public IntWrapper pacmanPlayer;
     public IntWrapper[] ghostPlayer;
-
+    
     int gameScore;
     int gameLives;
     
