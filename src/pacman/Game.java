@@ -62,7 +62,7 @@ public class Game extends Thread
         objectList = new ArrayList();
         
         // Window init.
-        windowInit(true);
+        windowInit(false);
         preloadSprites();
         // Keyboard init.
         keyboardControl.keyboardInit();
@@ -143,15 +143,19 @@ public class Game extends Thread
         while (running){
             loops = 0;
             
-            while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip)) {
+            while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip) && (!halted)) {
                 gameStep();
                 
                 nextStep += framesSkip;
                 globalCounter ++;
-                loops ++;
-            }            
-            if (running) gameDraw();
-            if (keyboardCheck("escape")) running = false;
+                loops ++;    
+                
+                if ((System.currentTimeMillis() <= nextStep) || (loops >= max_render_skip)) {
+                    if (running)  gameDraw();
+                }
+                
+                if (keyboardCheck("escape")) running = false;
+            }
         }
         
         gameWindow.setVisible(false);
@@ -180,11 +184,14 @@ public class Game extends Thread
         }
         
         keyboardControl.keyboardSetHold();
+        for (int player : keyboardControlRemote.keySet())
+            keyboardControlRemote.get(player).keyboardSetHold();
     }
     
     protected void gameDraw() {
         // Podobnie do gameStep, tyle, że rysuje wszystkie
         // obiekty zamiast wywoływać kod do zmiany ich stanów.
+        if ((clientGame != null) || (halted)) return;
         
         BufferedImage buf = new BufferedImage(
                 gameWindow.getSize().width,gameWindow.getSize().height,BufferedImage.TYPE_INT_RGB);
@@ -366,28 +373,47 @@ public class Game extends Thread
     // Dostęp do menu i klawiatury.
     //////////////////////////////////////////////////////////////////////
     
+    public void gotoMenu(String which){
+        menuControl.gotoMenu(which);
+    }
+    
     public KeyboardControl getKeyboard(int i) {
+        if (keyboardControlRemote.containsKey(i)) return keyboardControlRemote.get(i);
         return keyboardControl;
     }
     
+    // Lokalna klawiatura.
     public boolean keyboardCheck(String key){///!!!!!!!!!!!!!!
-        return keyboardControl.keyboardCheck(key);
+        return keyboardCheck(key,0);
     }
     
     public boolean keyboardHoldCheck(String key){///!!!!!!!!!!!!!!
-        return keyboardControl.keyboardHoldCheck(key);
+        return keyboardHoldCheck(key,0);
     }
     
     public char keyboardCharCheck() {
-        return '\0';
+        return keyboardCharCheck(0);
     }
 
     protected String checkPressedKeys(){  ///!!!!!!!!!!!!!!
-        return keyboardControl.checkPressedKeys();
+        return checkPressedKeys(0);
     }
     
-    public void gotoMenu(String which){
-        menuControl.gotoMenu(which);
+    // Osobne klawiatury.
+    public boolean keyboardCheck(String key, int player){
+        return getKeyboard(player).keyboardCheck(key);
+    }
+    
+    public boolean keyboardHoldCheck(String key, int player){
+        return getKeyboard(player).keyboardHoldCheck(key);
+    }
+    
+    public char keyboardCharCheck(int player) {
+        return getKeyboard(player).keyboardCharCheck();
+    }
+
+    protected String checkPressedKeys(int player){
+        return getKeyboard(player).checkPressedKeys();
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -400,6 +426,7 @@ public class Game extends Thread
 //    };
     
     public Callable<Void> callableStartSever = () -> {
+        halt();
         startServer();
         return null;
     };
@@ -410,13 +437,16 @@ public class Game extends Thread
     };
     
     protected void startClient(String addressIP, String port, int playerID){
-        Client client = new Client(addressIP, new Integer(port), playerID);
+        clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
+        clientGame.init();
     }
 
     protected void  startServer(){
-        int port = new Integer(portString.value);
+        serverGame = new ServerGame(portString,playersAmount);
+        serverGame.init();
+        /*int port = new Integer(portString.value);
         listening = true;
-        MyServer server = new MyServer(port, playersAmount.value);
+        MyServer server = new MyServer(port, playersAmount.value);*/
     }
 
     protected void stopServer(){

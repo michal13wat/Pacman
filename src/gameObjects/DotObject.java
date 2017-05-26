@@ -16,12 +16,12 @@ public class DotObject extends CollectibleObject implements Serializable
         subimageIndex = 0;
     }
     
-    @Override
+    /*@Override
     public boolean sendMe() {
         if (sent == false) {
             sent = true;
             return true;
         }
         return false;
-    }
+    }*/
 }

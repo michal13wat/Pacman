@@ -3,6 +3,7 @@ package clientAndServer;
 /**
  * Created by User on 2017-04-17.
  */
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,16 +14,20 @@ import java.nio.channels.SocketChannel;
 
 
 public class ServerThread extends Thread {
-    ServerSocketChannel serverSocket;
     private static volatile int port;
     private static int threadCnt = 0;
     private int threadNum;
     private static int connectedClients = 0;
     private static boolean unlock = false;
 
+    private static volatile byte[] bytesToSend = null;
     private static volatile PackReceivedFromServer objToSend = null;
     public static volatile PackToSendToServer objReceived = null;
-
+    
+    ObjectOutputStream oos = null;
+    BufferedOutputStream bos = null;
+    ObjectInputStream ois = null;
+    
     SocketChannel playerWhiteSocket;
     static boolean[] verifySendObject = null;
 
@@ -36,42 +41,45 @@ public class ServerThread extends Thread {
     }
 
     public ServerThread(SocketChannel socket, int port) {
-        //!!!!!!!!!!!
+        this.playerWhiteSocket = socket;
+        this.port = port;
+        
+        threadNum = threadCnt;
+        threadCnt++;
+        verifySendObject = new boolean[MyServer.getClientAmount()];
+        for (int i = 0; i < verifySendObject.length; i++){
+            verifySendObject[i] = false;
+        }
     }
     
     @Override
     public void run() {
         try
         {
-            serverSocket = ServerSocketChannel.open();
-            serverSocket.configureBlocking(true);
-
-            serverSocket.socket().bind(new InetSocketAddress(port++));
-
             System.out.print("Wątek serwerowy nr: " + threadNum + "\n");
-            playerWhiteSocket = serverSocket.accept();
+            
             try{
                 playerWhiteSocket.socket().setSoTimeout(25);
             }catch (SocketException e){
                 System.out.print("Złapano wyjątek związany z timeout-em w serwerze\n");
             }
+            
             System.out.print("Podłączono klienta \n");
-            connectedClients++;
-            if (connectedClients == MyServer.getClientAmount()){
-                System.out.print("Wszyscy klienci podłączeni - Naciśnij Enter aby rozpocząć grę\n");
-                setServerIntoLockMode();
-            }
+            
+            oos = new ObjectOutputStream(playerWhiteSocket.socket().getOutputStream());
+            bos = new BufferedOutputStream(playerWhiteSocket.socket().getOutputStream());
+            ois = new ObjectInputStream(playerWhiteSocket.socket().getInputStream());
 
             while (true){
                 if (isSentByXThread(threadNum)){
                     System.out.print("Rozopoczynam wysłanie obiektu \n");
-                    sendObject(playerWhiteSocket, objToSend);
+                    sendObject(playerWhiteSocket, objToSend, bytesToSend);
 
                     threadXSendObject(threadNum);
                     System.out.print("Wysłano obiekt \n");
                 }
+                
                 receiveObject(playerWhiteSocket);
-
 //                System.out.print("Pętla wątku obierającego nr.: " + threadNum + " \n");
             }
         }
@@ -82,24 +90,29 @@ public class ServerThread extends Thread {
     }
     
     public void stopThread() {
-        // !!!!!!!!!!!!!!!!!!!!!!!!!
+        try {
+            playerWhiteSocket.close();
+            oos.close();
+            bos.close();
+            ois.close();
+        }
+        catch (Exception e) {}
     }
 
-    private void sendObject(SocketChannel sChannel, PackReceivedFromServer object) throws IOException
+    private void sendObject(SocketChannel sChannel, PackReceivedFromServer object, byte[] bytes) throws IOException
     {
-        ObjectOutputStream oos = new
-                ObjectOutputStream(sChannel.socket().getOutputStream());
-        oos.writeObject(object);
-        oos.flush();
+        bos.write(bytes);
+        bos.flush();
+        //oos.writeObject(object);
+        //oos.flush();
     }
 
     synchronized private void receiveObject (SocketChannel sChannel)
     {
-        ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(sChannel.socket().getInputStream());
             objReceived = (PackToSendToServer)ois.readObject();
-            System.out.print("Metoda odbierająca... \n");
+            //if (objReceived != null)
+            //{System.out.print("SERWER - Metoda odbierająca... \n");}
         } catch (IOException | ClassNotFoundException e){
             // Tutaj cały czas wywala wyjątek związany z timeout-em Socket-a, ale nie należy się tym przejnować.
             // Niestety zrobiłem to tak trochę dziadowo i właśnie na tej zasadzie to działa...
@@ -112,6 +125,7 @@ public class ServerThread extends Thread {
     public static synchronized void setObjToSend(PackReceivedFromServer objToSend, byte[] bytesToSend) {
         if (isSent() || unlock){
             ServerThread.objToSend = objToSend;
+            ServerThread.bytesToSend = bytesToSend;
             for (int i = 0; i < verifySendObject.length; i++){
                 verifySendObject[i] = true;
             }

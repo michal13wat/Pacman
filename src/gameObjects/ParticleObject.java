@@ -23,14 +23,14 @@ public class ParticleObject extends ActiveObject implements Serializable {
         this.imageSpeed = imageSpeed;
     }
     
-    @Override
+    /*@Override
     public boolean sendMe() {
         if (sent == false) {
             sent = true;
             return true;
         }
         return false;
-    }
+    }*/
     
     private double imageSpeed;
     private int imageCount;

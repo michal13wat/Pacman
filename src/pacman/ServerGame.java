@@ -122,7 +122,7 @@ public class ServerGame extends Game {
                 System.out.println("new remote keyboard - " + i);
             }
             
-            System.out.print("SERVER - name = " + pack.getPlayersName() + " id = " + pack.getPlayersId()
+            System.out.print("SERWER - name = " + pack.getPlayersName() + " id = " + pack.getPlayersId()
             + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
             
             // Ustawianie odpowiednich wejść z klawiatury.

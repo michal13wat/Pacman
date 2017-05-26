@@ -23,14 +23,14 @@ public class NeutralizerObject extends CollectibleObject implements Serializable
         counter ++;
     }
     
-    @Override
+    /*@Override
     public boolean sendMe() {
         if (sent == false) {
             sent = true;
             return true;
         }
         return false;
-    }
+    }*/
     
     @Override
     public void getCollected(CharacterObject obj) {

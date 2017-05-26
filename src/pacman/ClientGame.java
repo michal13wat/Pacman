@@ -178,6 +178,7 @@ public class ClientGame extends Game {
     }
     
     private void overlapIds(ArrayList<GameObject> newList) {
+        System.out.print("KLIENT - MAMY " + objectList.size() + " ODEBRANE: " + newList.size());
         for (GameObject oo : newList)
             for (ListIterator<GameObject> iter = objectList.listIterator(); iter.hasNext(); ) {
                 GameObject o = iter.next();
@@ -185,10 +186,9 @@ public class ClientGame extends Game {
                     iter.remove();
             }
         //objectList.clear();
-        System.out.print("KLIENT - MAMY " + objectList.size() + " ODEBRANE: ");
         for (GameObject oo : newList) {
             objectList.add(oo);
-            System.out.print(oo.getClass().getName() + " ");
+            //System.out.print(oo.getClass().getName() + " ");
         }
         System.out.print("\n");
         //for (GameObject o : objectList)
@@ -208,7 +208,7 @@ public class ClientGame extends Game {
     public KeyboardControl getKeyboard(int i) {
         if (i == clientId) return keyboardControl;
         if (keyboardControlRemote.containsKey(i)) return keyboardControlRemote.get(i);
-        System.out.println(i);
+        //System.out.println(i);
         return keyboardControl;
     }
     

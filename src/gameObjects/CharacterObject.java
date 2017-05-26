@@ -49,26 +49,26 @@ abstract public class CharacterObject extends ActiveObject {
         if ((hiddenCounter == 0) /*&& (xspeed + yspeed == 0)*/) {
             if (xspeed + yspeed == 0)
             {
-                if ((game.keyboardHoldCheck("left")) && (!game.keyboardHoldCheck("right")))
+                if ((game.keyboardHoldCheck("left",playerId)) && (!game.keyboardHoldCheck("right",playerId)))
                     xspeed = -defaultSpeed;
-                else if ((game.keyboardHoldCheck("right")) && (!game.keyboardHoldCheck("left")))
+                else if ((game.keyboardHoldCheck("right",playerId)) && (!game.keyboardHoldCheck("left",playerId)))
                     xspeed = defaultSpeed;
-                if ((game.keyboardHoldCheck("up")) && (!game.keyboardHoldCheck("down")))
+                if ((game.keyboardHoldCheck("up",playerId)) && (!game.keyboardHoldCheck("down",playerId)))
                     yspeed = -defaultSpeed;
-                else if ((game.keyboardHoldCheck("down")) && (!game.keyboardHoldCheck("up")))
+                else if ((game.keyboardHoldCheck("down",playerId)) && (!game.keyboardHoldCheck("up",playerId)))
                     yspeed = defaultSpeed;
             }
             else if (turnCounter == 0)
             {
                 double tmpx = xspeed;
                 double tmpy = yspeed;
-                if ((game.keyboardHoldCheck("left")) && (!game.keyboardHoldCheck("right")) && (xspeed > 0))
+                if ((game.keyboardHoldCheck("left",playerId)) && (!game.keyboardHoldCheck("right",playerId)) && (xspeed > 0))
                     xspeed = -defaultSpeed;
-                else if ((game.keyboardHoldCheck("right")) && (!game.keyboardHoldCheck("left")) && (xspeed < 0))
+                else if ((game.keyboardHoldCheck("right",playerId)) && (!game.keyboardHoldCheck("left",playerId)) && (xspeed < 0))
                     xspeed = defaultSpeed;
-                else if ((game.keyboardHoldCheck("up")) && (!game.keyboardHoldCheck("down")) && (yspeed > 0))
+                else if ((game.keyboardHoldCheck("up",playerId)) && (!game.keyboardHoldCheck("down",playerId)) && (yspeed > 0))
                     yspeed = -defaultSpeed;
-                else if ((game.keyboardHoldCheck("down")) && (!game.keyboardHoldCheck("up")) && (yspeed < 0))
+                else if ((game.keyboardHoldCheck("down",playerId)) && (!game.keyboardHoldCheck("up",playerId)) && (yspeed < 0))
                     yspeed = defaultSpeed;
                 if ((tmpx != xspeed) || (tmpy != yspeed)) turnCounter = 5;
             }
@@ -200,32 +200,32 @@ abstract public class CharacterObject extends ActiveObject {
         return !isPlayed;
     }
     protected boolean willTurnLeft(){
-        return !isPlayed ? (randomFactor >= 0.5) : game.keyboardHoldCheck("left");
+        return !isPlayed ? (randomFactor >= 0.5) : game.keyboardHoldCheck("left",playerId);
     }
     protected boolean willTurnRight(){
-        return !isPlayed ? (randomFactor < 0.5) : game.keyboardHoldCheck("right");
+        return !isPlayed ? (randomFactor < 0.5) : game.keyboardHoldCheck("right",playerId);
     }
     protected boolean willTurnUp(){
-        return !isPlayed ? (randomFactor >= 0.5) : game.keyboardHoldCheck("up");
+        return !isPlayed ? (randomFactor >= 0.5) : game.keyboardHoldCheck("up",playerId);
     }
     protected boolean willTurnDown(){
-        return !isPlayed ? (randomFactor < 0.5) : game.keyboardHoldCheck("down");
+        return !isPlayed ? (randomFactor < 0.5) : game.keyboardHoldCheck("down",playerId);
     }
     // Going into entrances.
     protected boolean mayEnter(){
         return isPlayed ? true : (randomFactor >= 0.5);
     }
     protected boolean willEnterLeft(){
-        return isPlayed ? game.keyboardHoldCheck("left") : true;
+        return isPlayed ? game.keyboardHoldCheck("left",playerId) : true;
     }
     protected boolean willEnterRight(){
-        return isPlayed ? game.keyboardHoldCheck("right") : true;
+        return isPlayed ? game.keyboardHoldCheck("right",playerId) : true;
     }
     protected boolean willEnterUp(){
-        return isPlayed ? game.keyboardHoldCheck("up") : true;
+        return isPlayed ? game.keyboardHoldCheck("up",playerId) : true;
     }
     protected boolean willEnterDown(){
-        return isPlayed ? game.keyboardHoldCheck("down") : true;
+        return isPlayed ? game.keyboardHoldCheck("down",playerId) : true;
     }
     
     

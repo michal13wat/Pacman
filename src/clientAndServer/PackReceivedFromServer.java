@@ -30,6 +30,10 @@ public class PackReceivedFromServer<T> implements Serializable {
     }
     
     public void clear() {
+        objectsList.clear();
+        deletedList.clear();
+        connectedClients.clear();
+        randomizer = null;
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 

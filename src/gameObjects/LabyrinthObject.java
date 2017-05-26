@@ -115,7 +115,7 @@ public class LabyrinthObject extends GameObject implements Serializable {
         game.gotoMenu("start");
     }
     
-    @Override
+    /*@Override
     public boolean sendMe() {
         if ((sent == false) && (sourceFile != null)) {
             System.out.println("SERWER - MOŻNA PRZESŁAĆ LABIRYNT");
@@ -123,7 +123,7 @@ public class LabyrinthObject extends GameObject implements Serializable {
             return true;
         }
         return false;
-    }
+    }*/
     
     public boolean checkCollision(int x, int y) {
         return (myCollisionMap[bounds(0,x,width-1)][bounds(0,y,height-1)]);

@@ -73,6 +73,7 @@ public class Client extends Thread {
 
     private void receiveObjectFromServer(SocketChannel sChannel){
         try{
+            ois = new ObjectInputStream(sChannel.socket().getInputStream());
            listInputPackages.addFirst((PackReceivedFromServer)ois.readObject());
         } catch (IOException | ClassNotFoundException e){
            System.out.print("Złapano wyjątek w odbierającej metodzie klienta: " + e.toString()+ "\n");
