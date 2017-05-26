@@ -19,10 +19,13 @@ public class Client extends Thread {
             new VirtualFlow.ArrayLinkedList<>();
     private volatile PackToSendToServer objToSendToServer = null;
 
+    ObjectOutputStream oos;
+    ObjectInputStream ois;
+    
     // Player Number is ID Client ( 0 - n), where: n = PlayersAmount - 1
     public Client(String address, int port, int playerNumber){
-        int port1 = port + playerNumber;
-
+        int port1 = port;// + playerNumber;
+        
         try{
             sChannel = SocketChannel.open();
             sChannel.configureBlocking(true);
@@ -31,6 +34,12 @@ public class Client extends Thread {
             System.out.print("Nazwiązanie połączenia z serwerame nie powiodło się!");
         }
         System.out.print("Klient podłączony na porcie " + port1 + "\n");
+
+        try {
+            oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+            ois = new ObjectInputStream(sChannel.socket().getInputStream());
+        }
+        catch (Exception e) {}
 
         try{
             sChannel.socket().setSoTimeout(15);
@@ -55,9 +64,8 @@ public class Client extends Thread {
 
     private void sendObjectToServer(SocketChannel sChannel, PackToSendToServer packOut){
         try{
-            ObjectOutputStream oos =
-                    new ObjectOutputStream(sChannel.socket().getOutputStream());
             oos.writeObject(packOut);
+            oos.flush();
         } catch (IOException e){
             System.out.print("Złapano wyjątek w wysłającej metodzie klienta\n");
         }
@@ -65,11 +73,9 @@ public class Client extends Thread {
 
     private void receiveObjectFromServer(SocketChannel sChannel){
         try{
-            ObjectInputStream ois =
-                    new ObjectInputStream(sChannel.socket().getInputStream());
-            listInputPackages.addFirst((PackReceivedFromServer)ois.readObject());
+           listInputPackages.addFirst((PackReceivedFromServer)ois.readObject());
         } catch (IOException | ClassNotFoundException e){
-//            System.out.print("Złapano wyjątek w odbierającej metodzie klienta\n");
+           System.out.print("Złapano wyjątek w odbierającej metodzie klienta: " + e.toString()+ "\n");
         }
     }
 
@@ -82,6 +88,7 @@ public class Client extends Thread {
     }
     
     public void close() {
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        try {sChannel.close();}
+        catch (Exception e) {sChannel = null;}
     }
 }
