@@ -51,15 +51,21 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-        while (true){
-            if (sChannel.isConnected()){
-                receiveObjectFromServer(sChannel);
-                if (objToSendToServer != null){
-                    sendObjectToServer(sChannel, objToSendToServer);
-                    objToSendToServer = null;
+        try {
+            while (running){
+                if (sChannel.isConnected()){
+                    receiveObjectFromServer(sChannel);
+                    if (objToSendToServer != null){
+                        sendObjectToServer(sChannel, objToSendToServer);
+                        objToSendToServer = null;
+                    }
                 }
             }
         }
+        catch (Exception e)
+        {close();}
+        
+        System.out.println("Zamykamy klienta!");
     }
 
     private void sendObjectToServer(SocketChannel sChannel, PackToSendToServer packOut){
@@ -89,7 +95,15 @@ public class Client extends Thread {
     }
     
     public void close() {
-        try {sChannel.close();}
+        running = false;
+        
+        try {
+            sChannel.close();
+            oos.close();
+            ois.close();
+        }
         catch (Exception e) {sChannel = null;}
     }
+    
+    boolean running = true;
 }

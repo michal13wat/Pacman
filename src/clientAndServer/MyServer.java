@@ -87,6 +87,8 @@ public class MyServer extends Thread {
             }
         }
         
+        killThreads();
+        System.out.println("Zamykamy serwer!");
     }
     
     public static int getClientAmount() {
@@ -97,10 +99,15 @@ public class MyServer extends Thread {
         for (ServerThread thread : serverThreads) {
             thread.stopThread();
         }
+        
+        executor.shutdownNow();
     }
     
     public void close() {
         running = false;
         killThreads();
+        try
+        {serverSocket.close();}
+        catch (Exception e) {}
     }
 }

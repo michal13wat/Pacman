@@ -156,7 +156,7 @@ public class MenuControl {
             });
 
         stageSelectMenu.addButtonPressOption("exitOnQ",()-> {
-                    game.close();
+                    gotoMenu("start");
                     return 1;
                 }, "q" );
     }
@@ -179,7 +179,7 @@ public class MenuControl {
                 return 1;
             });
         menu.addButtonPressOption("exitOnQ",()-> {
-                    game.close();
+                    gotoMenu("start");
                     return 1;
                 }, "q" );
     }
@@ -197,12 +197,13 @@ public class MenuControl {
             Game.ipString.value = "localhost";
             //portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
             Game.playerNumber.value = 0;
-            game.getExecutor().submit(game.callableStartClient);
-            game.halt();
-            gotoMenu("start");
+            //game.getExecutor().submit(game.callableStartClient);
+            //game.halt();
+            
+            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
             return 1;
         });
-
+        
         menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 2, 4);
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addNumberInputOption("Port: ",null,Game.portString,null,4);
@@ -212,7 +213,7 @@ public class MenuControl {
             return 1;
         });
         menu.addButtonPressOption("exitOnQ",()-> {
-            game.close();
+            gotoMenu("server_setup");
             return 1;
         }, "q" );
     }
@@ -230,9 +231,11 @@ public class MenuControl {
             Game.ipString.value = "localhost";
 //            portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
 //            playerNumber.value - takie jak zostało odczytane z MENU, czyli bez zmian
-            game.getExecutor().submit(game.callableStartClient);
-            game.halt();
-            gotoMenu("start");
+            //game.getExecutor().submit(game.callableStartClient);
+            //game.halt();
+            
+            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
+            
             return 1;
         });
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
@@ -244,7 +247,7 @@ public class MenuControl {
             return 1;
         });
         menu.addButtonPressOption("exitOnQ",()-> {
-            game.close();
+            gotoMenu("server_setup");
             return 1;
         }, "q" );
     }

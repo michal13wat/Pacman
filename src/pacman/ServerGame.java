@@ -77,7 +77,6 @@ public class ServerGame extends Game {
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
-        isPacmanPlayed = new IntWrapper(0);
 
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
@@ -114,7 +113,6 @@ public class ServerGame extends Game {
             }
         }
         
-        System.out.println("Server closing!");
         server.close();
     }
     
@@ -182,6 +180,12 @@ public class ServerGame extends Game {
             if (o.sendMe())
                 packOutToClient.addObject(o);
         
+        // Wysyłanie z powrotem wejść od wszystkich klientów.
+        packOutToClient.addFeedbacks(arrayWithDataFromPlayers);
+        
+        packOutToClient.gameScore = gameScore;
+        packOutToClient.gameLives = gameLives;
+        
         // serializacji paczki
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = null;
@@ -234,11 +238,6 @@ public class ServerGame extends Game {
         running = false;}
     public boolean isRunning() {
         return running;}
-    
-    // PO JEDNYM DLA POŁĄCZONEGO GRACZA!!!
-    HashMap <Integer,Integer> playerNumbers;
-    HashMap <Integer,String> playerNames;
-    HashMap <Integer,Integer> playerCharacters;
     
     ArrayList<Integer> deletedIds = new ArrayList<>();
     ArrayList<PackToSendToServer> arrayWithDataFromPlayers = new ArrayList<>();

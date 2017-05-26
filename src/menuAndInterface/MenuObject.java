@@ -221,6 +221,11 @@ public class MenuObject extends GameObject implements Serializable {
             firstStep = false;
         }
         
+        counter++;
+        
+        if (counter < 5)
+            return;
+        
         // Kontrola opcji.
         MenuOption m = myOptions.get(cursorPos);
         
@@ -257,15 +262,15 @@ public class MenuObject extends GameObject implements Serializable {
         }
         
         // Ukryte opcje.
-        for (int i = 0; i < hiddenOptions.size(); i ++) {
-            MenuOption o = hiddenOptions.get(i);
-            if ((o instanceof ButtonPressOption)
-            && (game.keyboardCheck(((ButtonPressOption)o).getButton()))
-            && (!game.keyboardHoldCheck(((ButtonPressOption)o).getButton())))
-                select(o);
+        if (!(m instanceof StringInputOption)) {
+            for (int i = 0; i < hiddenOptions.size(); i ++) {
+                MenuOption o = hiddenOptions.get(i);
+                if ((o instanceof ButtonPressOption)
+                && (game.keyboardCheck(((ButtonPressOption)o).getButton()))
+                && (!game.keyboardHoldCheck(((ButtonPressOption)o).getButton())))
+                    select(o);
+            }
         }
-        
-        counter++;
     }
 
     @Override

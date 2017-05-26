@@ -102,7 +102,6 @@ public class Game extends Thread
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
-        isPacmanPlayed = new IntWrapper(0);
 
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
@@ -148,16 +147,17 @@ public class Game extends Thread
                 
                 nextStep += framesSkip;
                 globalCounter ++;
-                loops ++;    
+                loops ++;
                 
                 if ((System.currentTimeMillis() <= nextStep) || (loops >= max_render_skip)) {
-                    if (running)  gameDraw();
+                    if (running) gameDraw();
                 }
                 
                 if (keyboardCheck("escape")) running = false;
             }
         }
         
+        System.out.println("Zamykamy grę!");
         gameWindow.setVisible(false);
         gameWindow.dispose();
     }
@@ -426,19 +426,30 @@ public class Game extends Thread
 //    };
     
     public Callable<Void> callableStartSever = () -> {
-        halt();
+        //halt();
         startServer();
         return null;
     };
 
-    public Callable<Void> callableStartClient = () -> {
-        startClient(ipString.value, portString.value, playerNumber.value);
-        return null;
-    };
+    //public Callable<Void> callableStartClient = () -> {
+        //startClient(ipString.value, portString.value, playerNumber.value);
+        //return null;
+    //};
     
-    protected void startClient(String addressIP, String port, int playerID){
+    public void startClient(String addressIP, String port, int playerID){
+        // Od teraz, klient odpalany jest "nad" grą - tak, żeby nie musiała już nic liczyć.
+        
         clientGame = new ClientGame(gameWindow,gameRenderer,playerName,chosenCharacter);
         clientGame.init();
+        
+        // Jak skończymy działanie klienta, to kasujemy też serwer.
+        if (serverGame != null) {
+            serverGame.stopGame();
+            executor.shutdownNow();
+            serverGame = null;
+        }
+        
+        clientGame = null;
     }
 
     protected void  startServer(){
@@ -470,7 +481,6 @@ public class Game extends Thread
     
     // Podwykonawcy.
     ExecutorService executor = Executors.newFixedThreadPool(4);
-    HashMap<Integer,KeyboardControlRemote> keyboardControlRemote = new HashMap<>();
     KeyboardControl keyboardControl = new KeyboardControl(this);
     MenuControl menuControl = new MenuControl(this);
     Random random = new Random();
@@ -497,8 +507,6 @@ public class Game extends Thread
     int gameScore;
     int gameLives;
     
-    public IntWrapper isPacmanPlayed;
-    
     boolean isPlayedGhostCreated = false;
     boolean listening = false;
     
@@ -508,6 +516,12 @@ public class Game extends Thread
     public static volatile StringWrapper portString;
     ServerGame serverGame;
     ClientGame clientGame;
+    
+    // PO JEDNYM DLA POŁĄCZONEGO GRACZA!!!
+    HashMap <Integer,KeyboardControlRemote> keyboardControlRemote = new HashMap<>();
+    HashMap <Integer,Integer> playerNumbers;
+    HashMap <Integer,String> playerNames;
+    HashMap <Integer,Integer> playerCharacters;
     
     //////////////////////////////////////////////////////////////////////
     // Akcesory i inne śmieci.
@@ -519,6 +533,10 @@ public class Game extends Thread
     
     public void setPlayedGhostCreated(boolean is){
         isPlayedGhostCreated = is;
+    }
+    
+    public boolean isRunning(){
+        return running;
     }
     
     public void close(){
@@ -540,10 +558,6 @@ public class Game extends Thread
     
     public int getStartingLives(){
         return startingLives.value;
-    }
-    
-    public boolean isPacmanPlayed(){
-        return (isPacmanPlayed.value == 0);
     }
     
     public int getNumberOfGhosts(){

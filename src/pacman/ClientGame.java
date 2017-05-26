@@ -45,8 +45,12 @@ public class ClientGame extends Game {
         framesPerSecond = 60;
         framesSkip = 1000/framesPerSecond;
         max_render_skip = 10;
-        
         objectList = new ArrayList();
+        
+        playerNumbers = new HashMap<>();
+        playerNames = new HashMap<>();
+        playerCharacters = new HashMap<>();
+        keyboardControlRemote = new HashMap<>();
         
         // Klawiatura.
         keyboardControl.keyboardInit();
@@ -70,7 +74,6 @@ public class ClientGame extends Game {
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
-        isPacmanPlayed = new IntWrapper(0);
         
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
@@ -106,7 +109,7 @@ public class ClientGame extends Game {
                     }
                 }
             
-                if (keyboardCheck("escape")) running = false;
+                if ((keyboardCheck("escape")) || (keyboardCheck("q"))) running = false;
             }
         }
         
@@ -165,6 +168,9 @@ public class ClientGame extends Game {
             System.out.print("KLIENT - Waiting for: " + packReceivedFromServer.getNotConnectedClients() +
                     " players\n");
             
+            gameScore = packReceivedFromServer.gameScore;
+            gameLives = packReceivedFromServer.gameLives;
+        
             // Przybieranie nowej listy jako własna.
             overlapIds(packReceivedFromServer.getObjectsList());
             deleteIds(packReceivedFromServer.getDeletedList());
@@ -187,6 +193,31 @@ public class ClientGame extends Game {
                 // Powiadamianie obiektów o labiryncie.
                 for (GameObject o : objectList) {
                     o.setCollisionMap(labyrinth);
+                }
+            }
+            
+            // Aktualizacja wejść od innych klientów (skopiowane na razie z ServerGame).
+            for (PackToSendToServer pack : packReceivedFromServer.getClientFeedback()){
+                if (pack.getPlayersId() != clientId) {
+                    if (!keyboardControlRemote.containsKey(pack.getPlayersId())) {
+                        // Tutaj jakiś błąd chyba...
+                        System.out.print("Klient poznał nowego gracza - name = " + pack.getPlayersName() + "\n");
+
+                        playerNumbers.put(pack.getPlayersId(), ++playersConnected);
+                        playerNames.put(pack.getPlayersId(), pack.getPlayersName());
+                        playerCharacters.put(pack.getPlayersId(), pack.getCharacter());
+                        keyboardControlRemote.put(pack.getPlayersId(), new KeyboardControlRemote(this));
+                        
+                        // Ustawianie postaci.
+                        chosenCharacter.value = pack.getCharacter();
+                        chooseCharacter(false,pack.getPlayersId());
+                        
+                        for (Integer i : keyboardControlRemote.keySet())
+                        System.out.println("new remote keyboard - " + i);
+                    }
+
+                    // Ustawianie odpowiednich wejść z klawiatury.
+                    ((KeyboardControlRemote)getKeyboard(pack.getPlayersId())).feedInput(pack.getPressedKey());
                 }
             }
         }
@@ -230,5 +261,6 @@ public class ClientGame extends Game {
     static volatile PackReceivedFromServer<GameObject> packReceivedFromServer;
     
     Client client;
+    int playersConnected;
     int clientId;
 }

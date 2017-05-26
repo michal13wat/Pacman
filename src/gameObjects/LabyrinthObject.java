@@ -112,7 +112,7 @@ public class LabyrinthObject extends GameObject implements Serializable {
         livesDisplay.destroy();
         endDisplay.destroy();*/
         
-        game.gotoMenu("start");
+        game.gotoMenu("stage_select");
     }
     
     /*@Override
