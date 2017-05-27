@@ -194,6 +194,10 @@ public class MenuControl {
         /* Prócz uruchomienia servera trzeba tutaj uruchomić jednego klienta lokalnie */
         menu.addMenuOption("Start", ()-> {
             game.getExecutor().submit(game.callableStartSever);
+
+            /*  TODO - wywalić tego sleep-a poniżej - jest on do debugowania*/
+            Thread.sleep(1000*3600*24); // czykaj 24h
+
             Game.ipString.value = "localhost";
             //portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
             Game.playerNumber.value = 0;

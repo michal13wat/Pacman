@@ -1,6 +1,7 @@
 package pacman;
 
 import clientAndServer.*;
+import server.ServerBrain;
 import sun.security.x509.IPAddressName;
 
 import java.awt.*;
@@ -442,8 +443,11 @@ public class Game extends Thread
     }
 
     protected void  startServer(){
-        serverGame = new ServerGame(portString,playersAmount);
-        serverGame.init();
+        serverBrain = new ServerBrain();
+
+        // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
+        //serverGame = new ServerGame(portString,playersAmount);
+        //serverGame.init();
         /*int port = new Integer(portString.value);
         listening = true;
         MyServer server = new MyServer(port, playersAmount.value);*/
@@ -508,6 +512,8 @@ public class Game extends Thread
     public static volatile StringWrapper portString;
     ServerGame serverGame;
     ClientGame clientGame;
+    // ----------------------------------------------
+    ServerBrain serverBrain;
     
     //////////////////////////////////////////////////////////////////////
     // Akcesory i inne śmieci.

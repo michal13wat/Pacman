@@ -1,6 +1,9 @@
 package clientAndServer;
 
+import org.omg.CORBA.*;
+
 import java.io.Serializable;
+import java.lang.Object;
 
 /**
  * Created by User on 2017-04-17.
@@ -10,7 +13,7 @@ import java.io.Serializable;
  *  Żeby nie toworzyć nowych klas osobno dla servera, użyję tych.
  *  */
 
-public class PackToSendToServer implements Serializable {
+public class PackToSendToServer implements Serializable{
     private int playersId;
     private String playersName;
     private int character;
@@ -54,5 +57,20 @@ public class PackToSendToServer implements Serializable {
 
     public String getPressedKey() {
         return pressedKey;
+    }
+
+    public boolean isEquals(PackToSendToServer pack){
+        if (pack == null) return  false;
+        if (this.playersId != pack.playersId) return false;
+        if (this.playersName != pack.playersName) return false;
+        if (this.character != pack.character) return  false;
+        if (this.pressedKey != pack.pressedKey) return false;
+        return  true;
+    }
+
+    public PackToSendToServer copy(){
+        PackToSendToServer out = new PackToSendToServer(this.playersName, this.character,
+                this.pressedKey, this.playersId);
+        return out;
     }
 }

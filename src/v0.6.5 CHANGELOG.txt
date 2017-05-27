@@ -11,6 +11,88 @@ Planowane zmiany w wersji v0.6.5:
   ograniczenie, aby w momencie podłączenia się wszystkich graczy pojawiał się ekran 
   typu: Wszyscy gracze podłączeni. Naciśnij start, aby rozpocząć grę (u każdego gracza się
   będzie coś takiego pojawiało i dowolny gracz może rozpocząć grę)
+- z serwera do klientów przesyłane są tylko te obiekty, które się zmieniły w stosunku
+  do poprzedniej (użyć obserwatorów)
+- z klienta do serwera przesyłane są również tylko te obiekty które zmieniły swoją
+  wartość w stosunku do poprzedniej 
   
   
+Jakie klasy będą mi potrzebne:
+a) w serwerze:
+	- ClientThread 	- przerobić na ServerReceiver (odbieranie danych od klientów)
+	- Broadcast	   	- przerobić na ServerSender (wysłanie danych do klientów)
+	- ServerBrain  	- zawartość main-a wrzucić do Game-a
+	- Data (po zakończonych testach wywalić to)
+	
+b) w kliencie:
+	- BroadcastReceiver - przerobić na ClientReceiver (odbieranie danych od serwera)
+	- Connection 		- przerobić na ClientSender   (wysłanie danych do serwera)
+	- Data (po zakończonych testach wywalić to)
   
+  
+Uwaga - nie importować nigdzie pakietu server, bo z dużym prawdopodobieństwem
+w wielu miejscach nazwy będą się powtarzały!!! Za każdym razem
+używać pełnej ścieżki, tj.:
+server. ... 
+
+Teraz testuję przesyłanie obiektów:
+1) klient -> serwer
+
+
+Do zrobienia:
+- jak już będzie działał klient i serwer pamiętać, żeby z powrotem przywrócić 
+   uruchomienie jednego klienta lokalnie w momencie wystartowania serwera
+- tym, że po kliknięciu start nie wyświetla się ekran z podłączonymi graczami,
+  to nie należy się na razie przejmować. Po prostu się on nie wyświetla
+  (i cały program się zawiesza), bo wtedy server czeka na jakieś dane
+  od klientów, a klienci są jeszcze niezaimplementowani
+  
+- Czyli tak:
+		Najpierw zrobić w ogóle opcję przesyłania tych obiektów klasy 
+		PackToSendToServer, gdy to już będzie działało, to przerobić
+		to na opcję z obserwatorem.
+		
+Spostrzeżenia:
+- w tej implementacji komunikacji nie musimy się obawiać, ze jakieś dane
+  zostaną zgubione w tej warstwie. Z tego co zauważyłem, to 
+  jeżeli w danym momencie nie mogą być przesłane przez socket-a,
+  to po prostu są automatycznie buforowane i czekają w kolejce na
+  wysłanie
+  
+ 
+Jak będzie działało odbieranie pakietów wejściowych od klientów:
+	- każdy wątek serwerowy ma jakiś tam swój bufor na dane odebrane od danego klienta
+	- jeżeli bufor w kliencie jakiś w kliencie bufor zostanie zmieniony, to 
+	  obserwator tej tego danego bufora zostaje powiadomiony i wrzuca zawartość tego
+	  bufora na koniec kolejki w ServerBrain
+	- w ServerBrain jest dwukierunkowa lista wiązana, nowe elementy są wrzucane
+	  na koniec tej kolejki, elementy do przetworzenia pobierane są z początku  kolejki
+	- pobierając element z tej kolejki w serwerze należy najpierw go wziąć i zaraz potem
+	  usunąć.
+	  
+Jak będą przesyłane pakiety serwer -> klienci:
+	- serwer co jakiś tam czas (np. co 20ms) będzie wysyłał do klientów ramki z danymi
+	- dane przed wysłaniem będą pakowane do obiektu specjalnej klasy i wysłane.
+	- przesyłane będą tylko te dane, które uległy zmianie w stosunku do poprzedniej ramki
+	- w kliencie jedyny mechanizm kolejkujący odebrane dane to: socket (kolejny 
+		pakiet jest odbierany z serwera dopiero, gdy poprzedni zostanie wyświetlony)
+  
+	- w serwerze będzie trzeba zrobić coś takiego, że kolejny obiekt będzie mógł być
+	    wysłany (przypisany do zmiennej, która będzie odpowiedzialna za buforowanie obiektu 
+		do wysłania) dopiero, gdy zostanie ustawiona jakaś tam flaga, że poprzedni został
+		wysłany
+  
+    - z tego co widzę - zasadniczo procedura przesyłania przez socket-y jest taka że:
+		Najpierw w kliencie muszę coś zacząć wysłać, a dopiero potem w serwerze
+		powinienem to zacząć odbierać, bo inaczej serwer się zawiesza...
+		
+Zapamiętać sobie raz na zawsze:
+ - NIGDY ALE TO PRZENIGDY NIE DEBUGOWAĆ PROGRAMU WIELOWĄTKOWEGO DEBUGEREM, TYLKO EWENUALNIE
+   POPRZEZ WYPISY NA EKRAN!!!
+   
+
+
+
+
+
+
