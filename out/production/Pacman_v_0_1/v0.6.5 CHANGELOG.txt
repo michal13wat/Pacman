@@ -1,3 +1,12 @@
+
+WAŻNE !!!
+Changelog zacznijcie czytać za linią znaków  "############".
+Póki co to jest jeszcze wersja robocza, a nie mam dziś już siły
+tego kończyć. Jutro już tak finalnie dokończę klienta i serwer
+(na razie działa symulacja działania serwera).
+W między czasie Janek możesz już działać.
+
+
 Planowane zmiany w wersji v0.6.5:
 - komunikacja klient - serwer przy pomocy Socket (nie SocketChannel)
 - w dowolnym momencie serwer może komunikować się z klientami i 
@@ -96,10 +105,10 @@ Zalety nowego serwera w stosunku do poprzedniej wersji:
 	- niezależnie od tego ilu klientów jest aktualnie podłączonych komunikacjia
 	  klient serwer działa cały czas
 	- z klientów do serwera przesyłane są dane tylko jeżeli uległy one zmianie 
-	- przy odpalonym serwerze i 4 klientach procesor jest obciążany 1-3%, w poprzeniej
+	- przy odpalonym serwerze i 4 klientach procesor jest obciążany 5-10%, w poprzeniej
 	  wersji 40-50% (z wyłączoną grą!)
-	- teoretycznie przesyłanie 60 fps nie powinno być dużym problemem
-	- server spokojnie może wysłać różne dane do klientów, a oni nie muszą musiał
+	- teoretycznie przesyłanie 30 fps nie powinno być dużym problemem
+	- server spokojnie może wysłać różne dane do klientów, a oni nie muszą mu 
 	  nic odpowiadać i w drugą stronę - działa to zupełnie niezależnie
 	
 Błędy które powstały w nowej wersji:
@@ -118,17 +127,72 @@ Jak działa symulacja przetwarzania przez serwer:
 Do zrobienia:
 	- zrobić w ServerBrain kolekcję która będzie trzymała podłączonych klientów
 		zrobić wysłanie tej informacji do klientów
-	- zrobić konfigurację serwera i klienta z poziomu okienkowego
 	- postarać się to przerobić tak, żeby wszystko co trzeba wysłać lub odebrać
 	   dało się ustawić i pobrać w ClientBrain i ServerBrain
+	- zrobić konfigurację serwera i klienta z poziomu okienkowego
 	- napisać instrukcję jak korzystać z tej symulacji i jak to zaadaptować w grze 
 	
 	
 	- serwer powinien wysłać tylko do klientów tylko te dane które uległy zmianie
 		w stosunku do poprzedniego stanu. Niestety nie zdążę tego zrobić.
-	- gdy wszyscy klienci nie są jeszcze podłączeni to co 5sek do wszystkich
+	- gdy wszyscy klienci nie są jeszcze podłączeni to co 2sek do wszystkich
+		klientów niezależnie czy dane zostały zmienione czy nie 
+		wysłane są wszystkie dane, ale z pustą listą klientów 
 	
-	
+########################################################################################	
+
+Skrócony opis symulacji (jak przebiega i jak to uruchomić):
+	- nie spodziewajcie się, że jak klikniecie start, to
+		będziecie mogli pograć :D  Uruchamianie gry 
+		jest wyłączone (to jest tylko symulacja) :)
+		Resztę trzeba dopisać...
+		Janek - mam nadzieję, że się tym zajmiesz :)
+	- aby odpalić symulację działania serwera należy najpierw włączyć serwer,
+		a potem klientów (UWAGA - wywaliłem tymczasowo uruchamianie pierwszego
+		klienta razem z serwerem - trzeba to zrobić oddzielnie)
+	- tuż po uruchomieniu serwera i podłączeniu pierwszego klienta
+		aż do czasu podłączenia wszystkich klientów, serwer co 3 sekundy
+		wysyła do klientów paczkę danych. Po co? Żeby w momencie
+		podłączenia nowych klientów (ekran oczekiwania na klientów -
+		jeszcze nie gotowy w tej wersji serwera)
+		mogła zaktualizować się ich lista.
+	- gdy wszyscy klienci są już podłączeni gdy któryś z klientów
+		napisze nazwę klawisza (dowolny string) jaki został wciśnięty
+		zostanie przesłana ona do serwera. Tam odbywa się 
+		symulacja przetwarzania (do nazwy klawisza dołączone jest
+		kolejne słowo "Pana Tadeusza" :D )
+	- po przetworzeniu jest to wszystko pakowane do specjalnej paczki
+		i wysłane do wszystkich klientów
+	- jak będziecie robić zmiany w kodzie to przejrzyjcie wszystkie
+		miejsca, które oznaczyłem  //TODO
+	- jak będziecie chcieli przesyłać prawdziwe obiekty gry, to
+		pamiętajcie, żeby w polu _clientV2.ClientBrain.recPack
+		zmienić generyczny typ wejściowy z TestObjectToSend na
+		GameObject czy co to tam ma być.
+		To samo tyczy się pola _serverV2.ServerBrain.packOut
+
+Instrukcja użytkowania serwera:
+	- dane odebrane przez serwer znajdują się w dwukierunkowej liście "recPacks" 
+		(statyczne pole klasy _serverV2.ServerBrain)
+		nowe dane odebrane od klientów są dołączone są na koniec kolejki.
+		Elementy należy pobierać z początku listy
+	- dane wysłane przez serwer do klientów znajdują się w obiekcie "packOut"
+		(statyczne pole klasy _serverV2.ServerBrain)
+	- przykład użycia danych wejściowych i wyjściowych w metodzie startServer 
+		klasy Game
+
+
+Instrukcja użytkowania klienta:
+	- dane odebrane przez klienta znajdują się w polu _clientV2.ClientBrain.recPack
+	- dane wysłane przez klienta znajdują się w polu _clientV2.ClientBrain.packOut
+	- przykładowe użycie danych wejściowych i wyjściowych w wątku
+		klasy ClientBrain oraz wątku klasy ClientReceiver
+		
+		
+Do zrobienia jutro:
+	- przesyłanie do klientów tylko obiektów, których wartość się zmieniła
+	- konfiguracja ustawień z okienek 
+	- ekran oczekiwania na graczy
 	
 	
 	

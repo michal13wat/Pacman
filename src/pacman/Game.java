@@ -436,6 +436,8 @@ public class Game extends Thread
         clientBrain = new _clientV2.ClientBrain();
         clientBrain.start();
 
+        while (true){}  // zablokoowanie programu
+
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
         //clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
         //clientGame.init();
