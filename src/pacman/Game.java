@@ -444,6 +444,28 @@ public class Game extends Thread
 
     protected void  startServer(){
         serverBrain = new ServerBrain();
+        serverBrain.start();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Aby rozpocząć wysłanie naciśnij jakiś klawisz: ");
+        String temp = scanner.next();
+
+        try{
+            Scanner sc = new Scanner(new File("src\\resources\\testoweDaneDoPrzeslania.txt"));
+            while (sc.hasNextLine()){
+                if (!ServerBrain.readPrevPack){
+                    temp = sc.next();
+                    System.out.println("wpisanie do bufora wysłającego");
+                    ServerBrain.packOut.setAdditionalInfo(temp);
+                    ServerBrain.readPrevPack = true;
+                    ServerBrain.lockBufferingToSend();
+                }
+            }
+            System.out.println("Czytanie z pliku zakończone!");
+        }catch (FileNotFoundException e){
+            System.out.println("=========  Otwieranie pliku nie powiodło się!");
+        }
+        while (true){}      // TODO - wywalić to
 
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
         //serverGame = new ServerGame(portString,playersAmount);

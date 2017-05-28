@@ -85,6 +85,52 @@ Jak będą przesyłane pakiety serwer -> klienci:
     - z tego co widzę - zasadniczo procedura przesyłania przez socket-y jest taka że:
 		Najpierw w kliencie muszę coś zacząć wysłać, a dopiero potem w serwerze
 		powinienem to zacząć odbierać, bo inaczej serwer się zawiesza...
+		
+Zapamiętać sobie raz na zawsze:
+ - NIGDY ALE TO PRZENIGDY NIE DEBUGOWAĆ PROGRAMU WIELOWĄTKOWEGO DEBUGEREM, TYLKO EWENUALNIE
+   POPRZEZ WYPISY NA EKRAN!!!
+   
+   
+Zalety nowego serwera w stosunku do poprzedniej wersji:
+	- komunikacja odbywa się zgodnie ze sztuką (tak jak przewiduje to dokumentacjia)
+	- niezależnie od tego ilu klientów jest aktualnie podłączonych komunikacjia
+	  klient serwer działa cały czas
+	- z klientów do serwera przesyłane są dane tylko jeżeli uległy one zmianie 
+	- przy odpalonym serwerze i 4 klientach procesor jest obciążany 1-3%, w poprzeniej
+	  wersji 40-50% (z wyłączoną grą!)
+	- teoretycznie przesyłanie 60 fps nie powinno być dużym problemem
+	
+Błędy które powstały w nowej wersji:
+	- w sumie nie jestem pewnie jak było w poprzedniej wersji, ale w tej
+	  są gubione pakiety wysłane do niektórych klientów (tylko czasami i tylko niektóre).
+	  Jest to spowodowane tym, że zmienna readPrevPack jest ustawia gdy, choć
+	  jeden z klientów wyśle pakiet. Ogólnie działa to dość dobrze i przy okazji
+	  dzięki temu, że nie jest sprawdzane to u wszystkich klientów tylko
+	  u jednego dowolnego to działa to sporo szybciej (nie blokuje się cały serwer), 
+	  a to że do niektórych klientów niektóre pakiety nie dotrą to chyba nie jest dużym
+	  problemem. Dzieje się to tylko w momencie szybkiego wysłania
+	  dużych danych...
+	- jeżeli będzie taka konieczność, to mogę to przerobić, żeby zawsze przesyłało
+	  wszystkie pakiety, ale wtedy będzie działać to wolniej (w skrajnym przypadku 
+	  nawet 4 razy wolniej)
+	  
+	  
+Jak działa symulacja przetwarzania przez serwer:
+	- klient wysyła do serwera jakieś tam dane (w symulacji będzie się zmieniać tylko
+	  nazwa wciśniętego klawisza)
+	- serwer odsyła wszystkim klientom nazwę tego klawisza + kolejne słowo z "Pana Tadeusza" :D
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+   
 
 
 
