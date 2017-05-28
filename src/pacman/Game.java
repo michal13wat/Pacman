@@ -447,18 +447,50 @@ public class Game extends Thread
         serverBrain.start();
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Aby rozpocząć wysłanie naciśnij jakiś klawisz: ");
-        String temp = scanner.next();
+//        System.out.println("Aby rozpocząć wysłanie naciśnij jakiś klawisz: ");
+//        String temp = scanner.next();
+        String temp;
 
         try{
-            Scanner sc = new Scanner(new File("src\\resources\\testoweDaneDoPrzeslania.txt"));
+            Scanner sc = new Scanner(new File("src\\resources\\KrotnieDane5K.txt"));
             while (sc.hasNextLine()){
-                if (!ServerBrain.readPrevPack){
+                if (!ServerBrain.checkIfAllThreadReadPrevPack()){
                     temp = sc.next();
+                    while (true){
+                        if (!ServerBrain.recPacks.isEmpty()){
+                            temp += "\t\tPressedKey = " + ServerBrain.recPacks.getFirst().getPressedKey();
+                            ServerBrain.recPacks.removeFirst();
+                            break;
+                        }
+                        try{
+                            Thread.sleep(3);
+                        }catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     System.out.println("wpisanie do bufora wysłającego");
                     ServerBrain.packOut.setAdditionalInfo(temp);
-                    ServerBrain.readPrevPack = true;
+                    ServerBrain.lockReadingNextPack();                //readPrevPack = true;
                     ServerBrain.lockBufferingToSend();
+
+                    /*
+                     Im to opóźnienie jest większe, tym mniej pakietów
+                     jest gubionych po drodze. Dla:
+                     10 ms gubionych jest ok 0,225%  - 60 FPS powinno spokojnie pociągnąć
+                     20 ms gubionych jest ok 0,025%  - 30 FPS powinno działać
+                     50 ms nic nie jest gubione ale działa powoli - max ~15 FPS
+
+                     Czym to jest zasadniczo spowodowane?
+                     Nie jestem pewnien, ale prawie na pewno chodzi o ustawianie i kasowanie
+                     flag w kolekcjach:
+                     sendPrevPack  i  readPrevPack, które są odpowiedzialne za synchronizację
+                     i blokowanie wątków. Niestety nie potrafię sobie z tym poradzić
+                    * */
+                    try{
+                        Thread.sleep(20);
+                    }catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             System.out.println("Czytanie z pliku zakończone!");
