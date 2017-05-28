@@ -1,8 +1,6 @@
 package pacman;
 
-import clientAndServer.*;
-import server.ServerBrain;
-import sun.security.x509.IPAddressName;
+//import _serverV2.ServerBrain;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -12,12 +10,9 @@ import java.util.*;
 
 import java.io.*;
 
-import java.awt.event.*;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import gameObjects.*;
 import javax.imageio.ImageIO;
@@ -438,28 +433,29 @@ public class Game extends Thread
     };
     
     protected void startClient(String addressIP, String port, int playerID){
-        clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
-        clientGame.init();
+        clientBrain = new _clientV2.ClientBrain();
+        clientBrain.start();
+
+        // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
+        //clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
+        //clientGame.init();
     }
 
     protected void  startServer(){
-        serverBrain = new ServerBrain();
+        serverBrain = new _serverV2.ServerBrain();
         serverBrain.start();
-        Scanner scanner = new Scanner(System.in);
 
-//        System.out.println("Aby rozpocząć wysłanie naciśnij jakiś klawisz: ");
-//        String temp = scanner.next();
         String temp;
 
         try{
             Scanner sc = new Scanner(new File("src\\resources\\KrotnieDane5K.txt"));
             while (sc.hasNextLine()){
-                if (!ServerBrain.checkIfAllThreadReadPrevPack()){
+                if (!_serverV2.ServerBrain.checkIfAllThreadReadPrevPack()){
                     temp = sc.next();
                     while (true){
-                        if (!ServerBrain.recPacks.isEmpty()){
-                            temp += "\t\tPressedKey = " + ServerBrain.recPacks.getFirst().getPressedKey();
-                            ServerBrain.recPacks.removeFirst();
+                        if (!_serverV2.ServerBrain.recPacks.isEmpty()){
+                            temp += "\t\tPressedKey = " + _serverV2.ServerBrain.recPacks.getFirst().getPressedKey();
+                            _serverV2.ServerBrain.recPacks.removeFirst();
                             break;
                         }
                         try{
@@ -469,15 +465,17 @@ public class Game extends Thread
                         }
                     }
                     System.out.println("wpisanie do bufora wysłającego");
-                    ServerBrain.packOut.setAdditionalInfo(temp);
-                    ServerBrain.lockReadingNextPack();                //readPrevPack = true;
-                    ServerBrain.lockBufferingToSend();
+                    _serverV2.ServerBrain.packOut.setAdditionalInfo(temp);
+                    _serverV2.ServerBrain.lockReadingNextPack();                //readPrevPack = true;
+                    _serverV2.ServerBrain.lockBufferingToSend();
 
                     /*
                      Im to opóźnienie jest większe, tym mniej pakietów
                      jest gubionych po drodze. Dla:
                      10 ms gubionych jest ok 0,225%  - 60 FPS powinno spokojnie pociągnąć
                      20 ms gubionych jest ok 0,025%  - 30 FPS powinno działać
+                            W sumie to nawet chyba mniej (wydaje mi się, że tylko
+                            pierwszy pakiet)...
                      50 ms nic nie jest gubione ale działa powoli - max ~15 FPS
 
                      Czym to jest zasadniczo spowodowane?
@@ -567,7 +565,8 @@ public class Game extends Thread
     ServerGame serverGame;
     ClientGame clientGame;
     // ----------------------------------------------
-    ServerBrain serverBrain;
+    _serverV2.ServerBrain serverBrain;
+    _clientV2.ClientBrain clientBrain;
     
     //////////////////////////////////////////////////////////////////////
     // Akcesory i inne śmieci.

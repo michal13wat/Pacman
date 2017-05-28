@@ -96,24 +96,16 @@ Zalety nowego serwera w stosunku do poprzedniej wersji:
 	- niezależnie od tego ilu klientów jest aktualnie podłączonych komunikacjia
 	  klient serwer działa cały czas
 	- z klientów do serwera przesyłane są dane tylko jeżeli uległy one zmianie 
-	- przy odpalonym serwerze i 4 klientach procesor jest obciążany 1-3%, w poprzeniej
+	- przy odpalonym serwerze i 4 klientach procesor jest obciążany 5-10%, w poprzeniej
 	  wersji 40-50% (z wyłączoną grą!)
-	- teoretycznie przesyłanie 60 fps nie powinno być dużym problemem
+	- teoretycznie przesyłanie 30 fps nie powinno być dużym problemem
+	- server spokojnie może wysłać różne dane do klientów, a oni nie muszą mu 
+	  nic odpowiadać i w drugą stronę - działa to zupełnie niezależnie
 	
 Błędy które powstały w nowej wersji:
 	- w sumie nie jestem pewnie jak było w poprzedniej wersji, ale w tej
 	  są gubione pakiety wysłane do niektórych klientów (tylko czasami i tylko niektóre 
-	  - ok 10%).
-	  Jest to spowodowane tym, że zmienna readPrevPack jest ustawia gdy, choć
-	  jeden z klientów wyśle pakiet. Ogólnie działa to dość dobrze i przy okazji
-	  dzięki temu, że nie jest sprawdzane to u wszystkich klientów tylko
-	  u jednego dowolnego to działa to sporo szybciej (nie blokuje się cały serwer), 
-	  a to że do niektórych klientów niektóre pakiety nie dotrą to chyba nie jest dużym
-	  problemem. Dzieje się to tylko w momencie szybkiego wysłania
-	  dużych danych...
-	- jeżeli będzie taka konieczność, to mogę to przerobić, żeby zawsze przesyłało
-	  wszystkie pakiety, ale wtedy będzie działać to wolniej (w skrajnym przypadku 
-	  nawet 4 razy wolniej)
+	  - ok 0,03% - testowane na 20.000 pakietów i 33 FPS)
 	  
 	  
 Jak działa symulacja przetwarzania przez serwer:
@@ -122,8 +114,54 @@ Jak działa symulacja przetwarzania przez serwer:
 	- serwer odsyła wszystkim klientom nazwę tego klawisza + kolejne słowo z "Pana Tadeusza" :D
 	
 	
+
+Do zrobienia:
+	- zrobić w ServerBrain kolekcję która będzie trzymała podłączonych klientów
+		zrobić wysłanie tej informacji do klientów
+	- postarać się to przerobić tak, żeby wszystko co trzeba wysłać lub odebrać
+	   dało się ustawić i pobrać w ClientBrain i ServerBrain
+	- zrobić konfigurację serwera i klienta z poziomu okienkowego
+	- napisać instrukcję jak korzystać z tej symulacji i jak to zaadaptować w grze 
 	
 	
+	- serwer powinien wysłać tylko do klientów tylko te dane które uległy zmianie
+		w stosunku do poprzedniego stanu. Niestety nie zdążę tego zrobić.
+	- gdy wszyscy klienci nie są jeszcze podłączeni to co 2sek do wszystkich
+		klientów niezależnie czy dane zostały zmienione czy nie 
+		wysłane są wszystkie dane, ale z pustą listą klientów 
+	
+
+Skrócony opis symulacji (jak przebiega i jak to uruchomić):
+	- aby odpalić symulację działania serwera należy najpierw włączyć serwer,
+		a potem klientów (UWAGA - wywaliłem tymczasowo uruchamianie pierwszego
+		klienta razem z serwerem - trzeba to zrobić oddzielnie)
+	- tuż po uruchomieniu serwera i podłączeniu pierwszego klienta
+		aż do czasu podłączenia wszystkich klientów, serwer co 3 sekundy
+		wysyła do klientów paczkę danych. Po co? Żeby w momencie
+		podłączenia nowych klientów (ekran oczekiwania na klientów)
+		mogła zaktualizować się ich lista.
+	- gdy wszyscy klienci są już podłączeni gdy któryś z klientów
+		napisze nazwę klawisza (dowolny string) jaki został wciśnięty
+		zostanie przesłana ona do serwera. Tam odbywa się 
+		symulacja przetwarzania (do nazwy klawisza dołączone jest
+		kolejne słowo "Pana Tadeusza" :D )
+	- po przetworzeniu jest to wszystko pakowane do specjalnej paczki
+		i wysłane do klientów
+		
+
+Instrukcja użytkowania serwera:
+	- dane odebrane przez serwer znajdują się w dwukierunkowej liście "recPacks" 
+		(statyczne pole klasy _serverV2.ServerBrain)
+		nowe dane odebrane od klientów są dołączone są na koniec kolejki.
+		Elementy należy pobierać z początku listy
+	- dane wysłane przez serwer do klientów znajdują się w obiekcie "packOut"
+		(statyczne pole klasy _serverV2.ServerBrain)
+	- przykład użycia danych wejściowych i wyjściowych w metodzie startServer 
+		klasy Game
+
+
+Instrukcja użytkowania klienta:
+
 	
 	
 	
