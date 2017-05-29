@@ -50,8 +50,8 @@ public class Game extends Thread
         framesSkip = 1000/framesPerSecond;
         max_render_skip = 10;
         
-        ipString = new StringWrapper("192168110");
-        portString = new StringWrapper("8080");
+        ipString = new StringWrapper("12700001");
+        portString = new StringWrapper("7171");
         
         wrapperInit();
         
@@ -428,14 +428,16 @@ public class Game extends Thread
     };
 
     public Callable<Void> callableStartClient = () -> {
-        startClient(ipString.value, portString.value, playerNumber.value);
+        startClient(ipString.value, new Integer(portString.value), playerNumber.value);
         return null;
     };
     
-    protected void startClient(String addressIP, String port, int playerID){
-        clientBrain = new _clientV2.ClientBrain();
+    protected void startClient(String addressIP, int port, int playerID){
+        clientBrain = new _clientV2.ClientBrain(addressIP, port, port + 1,
+                playerName.value, playerID);
         clientBrain.start();
 
+        //gotoMenu("display_connected_players");
         while (true){}  // zablokoowanie programu
 
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
@@ -444,7 +446,8 @@ public class Game extends Thread
     }
 
     protected void  startServer(){
-        serverBrain = new _serverV2.ServerBrain();
+        int port = new Integer(portString.value);
+        serverBrain = new _serverV2.ServerBrain(port, port + 1, playersAmount.value);
         serverBrain.start();
 
         String temp;

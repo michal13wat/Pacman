@@ -9,13 +9,13 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class ServerBrain extends Thread {
 
-    public static int clientAmount = 4;
+    public static int clientAmount; // = 4;
     protected static ArrayList<ServerReceiver> clientList = new ArrayList<>();
     protected static ArrayList<ServerSender> brcList = new ArrayList<>();
     public static volatile ArrayList<String> connectedClients = new ArrayList<>();
     public static volatile int notConnectedClients = clientAmount;
-    private int recPort = 7171;
-    private int brcPort = 7172;
+    private int recPort; // = 7171;
+    private int brcPort; // = 7172;
 
     public static LinkedBlockingDeque<clientAndServer.PackToSendToServer> recPacks
             = new LinkedBlockingDeque<>();
@@ -23,12 +23,13 @@ public class ServerBrain extends Thread {
     public static clientAndServer.PackReceivedFromServer<TestObjectToSend> packOut
             = new clientAndServer.PackReceivedFromServer<>();
     public volatile static ArrayList<Boolean> sendPrevPack = new ArrayList<>();
-    public volatile static ArrayList<Boolean> readPrevPack = new ArrayList<>(); // na początku false
+    public volatile static ArrayList<Boolean> readPrevPack = new ArrayList<>();
 
-    public ServerBrain() {
+    public ServerBrain(int recPort, int brcPort, int clientAmount) {
         System.out.println("Server starting...");
-
-        //ServerBrain.packOut.setAdditionalInfo("blabla");
+        this.recPort = recPort;
+        this.brcPort = brcPort;
+        this.clientAmount = clientAmount;
     }
 
     public void run(){

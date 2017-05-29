@@ -58,10 +58,10 @@ public class MenuControl {
                 joinGameMenu();
             }
             break;
-            //case "display_connected_players": {
-            //    displayConnectedClients();
-            //}
-            //break;
+//            case "display_connected_players": {
+//                displayConnectedClients();
+//            }
+//            break;
         }
     }
     
@@ -194,9 +194,8 @@ public class MenuControl {
         /* Prócz uruchomienia servera trzeba tutaj uruchomić jednego klienta lokalnie */
         menu.addMenuOption("Start", ()-> {
             game.getExecutor().submit(game.callableStartSever);
-
-            /*  TODO - wywalić tego sleep-a poniżej - jest on do debugowania*/
-            Thread.sleep(1000*3600*24); // czykaj 24h
+            //if (true) return  1;
+            /*  TODO - wywalić tego if-a powyżej - jest on do debugowania, żeby gra się nie włączała*/
 
             Game.ipString.value = "localhost";
             //portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
@@ -209,7 +208,7 @@ public class MenuControl {
 
         menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 2, 4);
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
-        menu.addNumberInputOption("Port: ",null,Game.portString,null,4);
+        menu.addNumberInputOption("Port: ",null,Game.portString,null,5);
 
         menu.addMenuOption("BACK", () -> {
             gotoMenu("server_setup");
@@ -231,18 +230,22 @@ public class MenuControl {
         menu.addMenuOption("Join",() -> {
             // TODO - UWAGA - na koniec wywalić poniższą linijkę, bo docelowo ma być bez zmian!!!
             // TODO - takie jak zostało odczytane z MENU !!!
-            Game.ipString.value = "localhost";
+
+            //System.out.println("Klient podłącza się do adresu: " + Game.ipString.value);
+            //Game.ipString.value = "localhost";
 //            portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
 //            playerNumber.value - takie jak zostało odczytane z MENU, czyli bez zmian
             game.getExecutor().submit(game.callableStartClient);
             game.halt();
-            gotoMenu("start");
-            return 1;
+
+            while (true){} // TODO - wywalić to (zablokuj grę)
+            //gotoMenu("start");
+            //return 1;
         });
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addSpinnerOption("Player ID: ", null, Game.playerNumber, 1, 3);
-        menu.addNumberInputOption("IP: ",null,Game.ipString,"xxx.xxx.x.xx",9);
-        menu.addNumberInputOption("Port: ",null,Game.portString,null,4);
+        menu.addNumberInputOption("IP: ",null,Game.ipString,"xxx.xxx.x.xxx",10);
+        menu.addNumberInputOption("Port: ",null,Game.portString,null,5);
         menu.addMenuOption("BACK", () -> {
             gotoMenu("server_setup");
             return 1;
@@ -252,6 +255,48 @@ public class MenuControl {
             return 1;
         }, "q" );
     }
+
+//    public void displayConnectedClients(){
+//        System.out.print("Ekran oczekiwania na graczy\n");
+//
+//        MenuObject menu = (MenuObject)createObject(MenuObject.class);
+//        menu.hidePrefixMenu();
+//        menu.setFont("pac_font_sprites",8,8);
+//        menu.setTitle("Connected:");
+//
+//        // Czekaj na odebranie danych z serwera
+//        while (_clientV2.ClientBrain.getNotConnectedClientsAmountBuffer() < 0){
+//            System.out.println("Liczba niepodłączonych klientów = " +
+//                    _clientV2.ClientBrain.getNotConnectedClientsAmountBuffer());
+//            try{ Thread.sleep(500);}
+//            catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//
+//        for (int i = 0; i < 4; i++){
+//            menu.addMenuOption("-", null);
+//        }
+//        //menu.addStringDisplayOption("- ", null, null, "- xxxxxxxx");
+////        menu.addMenuOption("- Michal", null);
+////        menu.addMenuOption("- Jan", null);
+////        menu.addMenuOption("- Jakub", null);
+////        menu.addMenuOption("- ", null);
+//
+//        menu.updateMenuOption("-", "- asdf");
+//        menu.addMenuOption("", null);       //  enter
+//        menu.addMenuOption("", null);       //  enter
+//        menu.addMenuOption("Waiting for: " + 0, null);
+//        menu.addMenuOption("player", null);
+//
+//
+//        menu.addButtonPressOption("exitOnQ",()-> {
+//                game.close();
+//                return 1;
+//            }, "q" );
+//    }
+
     
     /*private void displayConnectedClients() {
         PackReceivedFromServer pack;
