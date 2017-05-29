@@ -30,6 +30,7 @@ public class ServerReceiver extends Thread {
                     System.out.print("Client ID = " + packIn.getPlayersId() + " press button: " + packIn.getPressedKey() + "\n");
                 } catch (IOException | ClassNotFoundException e){
                     e.printStackTrace();
+                    break;
                 }
 			}
 		} catch (IOException e) {

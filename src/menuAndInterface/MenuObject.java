@@ -306,6 +306,17 @@ public class MenuObject extends GameObject implements Serializable {
         o.setMenuOption(name,newFunction);
         myOptions.add(o);
     }
+
+    public void updateMenuOption(String oldName, String newName){
+        for (int i = 0; i < myOptions.size(); i++){
+            if (myOptions.get(i).getName().equals(oldName)){
+                MenuOption o = new MenuOption();
+                o.setMenuOption(newName, null);
+                myOptions.set(i, o);
+                return;
+            }
+        }
+    }
     
     public void addButtonPressOption(String name, Callable newFunction, String button) {
         ButtonPressOption o = new ButtonPressOption();

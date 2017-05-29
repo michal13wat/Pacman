@@ -8,9 +8,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ClientSender extends Thread {
-	String hostName = null;
+	volatile String hostName = null;
 	int portNumber = -1;
-    private volatile PackToSendToServer packOut = null; // = new clientAndServer.PackToSendToServer("asdf", 0, "up", 394);
+    private volatile PackToSendToServer packOut = null;
     private clientAndServer.PackToSendToServer prevPackOut = null;
 
 	public ClientSender(String hostName, int portNumber, PackToSendToServer packOut) {
@@ -24,7 +24,7 @@ public class ClientSender extends Thread {
 		try (Socket socket = new Socket(hostName, portNumber);
 				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 		) {
-            //out.flush();
+            //System.out.println("Wątek wysłający klienta podłączony do adresu: " + hostName);
             while (true){
                 Thread.sleep(10);
                 out.flush();

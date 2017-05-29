@@ -197,12 +197,44 @@ Do zrobienia jutro:
 	
 	
 	
+W wielu miejscach w programie pododawałem kawałki kodu zatrzymujące
+program w danym miejscu. Jako instrukcji zatrzymujących użyłem:
+
+	if (true) return 1; 			// głównie przy wyborze MENU
+	while (true) {}					// w różnych miejscach
+	Thread.sleep(jakiśDługiCzas)	// też w różnych miejscach
+
+W większość przypadków oznaczyłem te kawałki kodu
+	// TODO - wywalić to
 	
 	
+Obawiam się, że z ekranu oczekiwania na klientów będziemy musieli zrezygnować
+	(wg. mnie za dużo przeróbek by to wymagało), a czasu jest zbyt mało.
+Trzeba będzie zrobić prostszą wersję - gdy wszyscy kliencie są podłączeni
+	po prostu jest uruchamiana gra...
+Janek - jeżeli chciałbyś się jednak tym zająć - to do klasy MenuObject dopisałem
+metodę updateMenuOption - działa. W klasie MenuControl w komentarzu 
+masz przykład użycia tego.
    
 
+   Pamiętać, żeby przy uruchamianiu jednego klienta lokalnie
+   też przypisywać mu nazwę gracza pobraną z okienka. 
+   
+   Pamiętać, żeby zrobić coś z wywalaniem tego wyjątku, gdy 
+   połączenie zostanie zakończone przez klienta.
 
-
-
+   Znalazłem Bug-a dlaczego wcześniej nie chciało działać na kilku
+   komputerach - bo adres IP był źle wczytywany.
+   Był wczytywany do stringa i trzymany jako np. 127001, zamiast
+	127.0.0.1  - bez kropek nie działa.
+	
+	
+Do zrobienia:
+	- konfigurajica portu i ID klienta i nazwy gracza z okienka
+	- przetestwoać to wszystko na dwóch komputerach
+   
+   
+   
+   
 
 

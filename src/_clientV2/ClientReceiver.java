@@ -24,6 +24,8 @@ public class ClientReceiver extends Thread {
 		) {
 			while (broadcastListening) {
 				_clientV2.ClientBrain.recPac = (clientAndServer.PackReceivedFromServer)in.readObject();
+                _clientV2.ClientBrain.writeToBufConnClients(ClientBrain.recPac.getConnectedClients(),
+                        ClientBrain.recPac.getNotConnectedClients());
                 receivedPackagesCounter++;
                 System.out.print(_clientV2.ClientBrain.recPac.getAdditionalInfo() + "\t\t Odebrano pakietów: "
                         + receivedPackagesCounter + "\t\tConnected Clients: ");
