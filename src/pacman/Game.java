@@ -445,11 +445,14 @@ public class Game extends Thread
         // Jak skończymy działanie klienta, to kasujemy też serwer.
         if (serverGame != null) {
             serverGame.stopGame();
-            executor.shutdownNow();
             serverGame = null;
         }
         
         clientGame = null;
+        executor.shutdownNow();
+        executor = Executors.newFixedThreadPool(4);
+        System.out.println("Wracamy do menu.");
+        gotoMenu("server_setup");
     }
 
     protected void  startServer(){
