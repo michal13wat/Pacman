@@ -65,7 +65,7 @@ public class LabyrinthObject extends GameObject implements Serializable {
         if (scoreDisplay != null) scoreDisplay.setText(String.format("%03d",game.getScore()));
         if (livesDisplay != null) {
             String s = "";
-            for (int i = 0; i < game.getLives(); i ++) s += "`";
+            for (int i = 0; i < game.getLives(); i ++) s += (char)201;
             livesDisplay.setText(s);
         }
         if (endDisplay != null) {
@@ -362,5 +362,4 @@ public class LabyrinthObject extends GameObject implements Serializable {
     public int getHeight() {
         return (height+1)*sizeMod;
     }
-    
 }

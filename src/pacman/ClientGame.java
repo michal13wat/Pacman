@@ -13,7 +13,7 @@ import java.util.ListIterator;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import menuAndInterface.MenuControl;
+import menuAndInterface.*;
 import static pacman.Game.ipString;
 //import static pacman.Game.packReceivedFromServer;
 import static pacman.Game.playerNumber;
@@ -39,6 +39,7 @@ public class ClientGame extends Game {
         
         // Parametry gry.
         running = true;
+        ready = false;
         
         wrapperInit();
         
@@ -63,6 +64,12 @@ public class ClientGame extends Game {
         String port = Game.portString.value;
         int playerID = Game.playerNumber.value;
         client = new Client(addressIP, new Integer(port), playerID);
+        
+        gotoMenu("game_lobby");
+        
+        PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
+        playerDisplay.loadFont("pac_font_sprites",8,8);
+        playerDisplay.setPosition(0,48);
         
         globalCounter = 0;
         gameLoop();
@@ -95,7 +102,7 @@ public class ClientGame extends Game {
             while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip)) {
                 sendInput();
                 receiveObjects();
-                gameStep();
+                if (!ready) gameStep();
                 
                 nextStep += framesSkip;
                 globalCounter ++;
@@ -134,7 +141,7 @@ public class ClientGame extends Game {
         // TODO - zrobić jak będzie działał wybór postaci
         character = chosenCharacter.value;
         pressedKey = checkPressedKeys();
-        System.out.println("KLIENT " + name + " " + pressedKey);
+        System.out.println("KLIENT " + name + (ready ? ("[OK] ") : "") + " " + pressedKey);
         
         // TODO - wywalić to opóźnienie
         
@@ -146,7 +153,8 @@ public class ClientGame extends Game {
             e.printStackTrace();
         }*/
         
-        client.setObjToSendToServer(new PackToSendToServer(name, character, pressedKey, clientId));
+        client.setObjToSendToServer(new PackToSendToServer(
+                name, character, pressedKey, clientId, ready));
     }
     
     protected void receiveObjects()
@@ -170,7 +178,7 @@ public class ClientGame extends Game {
             
             gameScore = packReceivedFromServer.gameScore;
             gameLives = packReceivedFromServer.gameLives;
-        
+            
             // Przybieranie nowej listy jako własna.
             overlapIds(packReceivedFromServer.getObjectsList());
             deleteIds(packReceivedFromServer.getDeletedList());
@@ -263,4 +271,9 @@ public class ClientGame extends Game {
     Client client;
     int playersConnected;
     int clientId;
+    
+    boolean ready;
+    
+    public void setReady(boolean x) {ready = x;}
+    public boolean isReady() {return ready;}
 }

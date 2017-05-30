@@ -15,12 +15,14 @@ public class PackToSendToServer implements Serializable {
     private String playersName;
     private int character;
     private String pressedKey;
+    private boolean ready;
 
-    public PackToSendToServer(String playersName, int character, String pressedKey, int playersId){
+    public PackToSendToServer(String playersName, int character, String pressedKey, int playersId, boolean ready){
         this.playersName = playersName;
         this.character = character;
         this.pressedKey = pressedKey;
         this.playersId = playersId;
+        this.ready = ready;
     }
 
     public void setPlayersId(int playersId) {
@@ -46,6 +48,10 @@ public class PackToSendToServer implements Serializable {
     
     public String getPlayersName() {
         return playersName;
+    }
+    
+    public boolean isPlayerReady() {
+        return ready;
     }
 
     public int getCharacter() {

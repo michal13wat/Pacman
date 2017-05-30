@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-import menuAndInterface.MenuControl;
+import menuAndInterface.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +29,7 @@ public class ServerGame extends Game {
     public void init(){
         // Parametry gry.
         running = true;
+        gameStarted = false;
         
         framesPerSecond = 60;
         framesSkip = 1000/framesPerSecond;
@@ -57,7 +58,18 @@ public class ServerGame extends Game {
         
         //gotoMenu("test");
         LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
-        l.setSource("src/resources/stages/pac_layout_2.txt");
+        l.setSource("src/resources/stages/pac_layout_3.txt");
+        
+        gameStep();
+        
+        PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
+        playerDisplay.loadFont("pac_font_sprites",8,8);
+        playerDisplay.setPosition(l.getWidth()+16,64);
+        
+        PlayerTagObject tagDisplay = (PlayerTagObject)createObject(PlayerTagObject.class);
+        tagDisplay.loadFont("pac_font_sprites",8,8);
+        tagDisplay.setPosition(l.getWidth()+16,64);
+        
         //createObject(TestObject.class);
         /*TextObject o = (TextObject)createObject(TextObject.class);
         o.setPosition(0, 0);
@@ -75,7 +87,6 @@ public class ServerGame extends Game {
         chosenCharacter = new IntWrapper(-1);
 
         startingLives = new IntWrapper(3);
-        playersAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
 
         pacmanPlayer = new IntWrapper(-1);
@@ -97,8 +108,7 @@ public class ServerGame extends Game {
             
             while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip)) {
                 
-                for (int i = 0; i < 1; i++)
-                {gameStep();}
+                if (gameStarted) gameStep();
                 
                 if (ServerThread.getObjReceived() != null) {
                     receiveInput();
@@ -119,6 +129,9 @@ public class ServerGame extends Game {
     protected void receiveInput() {
         // odbieranie obiektu
         putToArrayDataReceivedFromServer(ServerThread.getObjReceived());
+        boolean allReady = true;//(playerNumbers.size() == playersAmount.value);
+        
+        System.out.println("SERWER - Gracze " + playerNumbers.size() + "/" + playersAmount.value);
         
         for (PackToSendToServer pack : arrayWithDataFromPlayers){
             if (!playerNumbers.containsKey(pack.getPlayersId())) {
@@ -137,12 +150,31 @@ public class ServerGame extends Game {
                 for (Integer i : keyboardControlRemote.keySet())
                 System.out.println("new remote keyboard - " + i);
             }
+           
+            System.out.print("SERWER - name = " + pack.getPlayersName() + ((pack.isPlayerReady()) ? (" [OK] ") : "")
+            + " id = " + pack.getPlayersId() + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
             
-            System.out.print("SERWER - name = " + pack.getPlayersName() + " id = " + pack.getPlayersId()
-            + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
+            if (!pack.isPlayerReady()) allReady = false;
             
             // Ustawianie odpowiednich wejść z klawiatury.
             ((KeyboardControlRemote)getKeyboard(pack.getPlayersId())).feedInput(pack.getPressedKey());
+        }
+        
+        // Jeżeli wszyscy gracze są gotowi, to zaczynamy.
+        if ((allReady == true) && (gameStarted == false)) {
+            
+            // Resetowanie postaci.
+            pacmanPlayer.value = -1;
+            for (int i = 0; i < 4; i++)
+                ghostPlayer[i].value = -1;
+            
+            for (PackToSendToServer pack : arrayWithDataFromPlayers){
+                chosenCharacter.value = pack.getCharacter();
+                chooseCharacter(false,pack.getPlayersId());
+            }
+            
+            System.out.println("SERWER - ZACZYNAMY GRĘ!!!");
+            gameStarted = true;
         }
         
         // Usunięte gdyż:
@@ -176,9 +208,12 @@ public class ServerGame extends Game {
         packOutToClient.addDeletedList(deletedIds);
         deletedIds.clear();
         
-        for (GameObject o : objectList)
-            if (o.sendMe())
-                packOutToClient.addObject(o);
+        // Wysyłanie obiektów zaczyna się dopiero od momentu początku gry.
+        if (gameStarted) {
+            for (GameObject o : objectList)
+                if (o.sendMe())
+                    packOutToClient.addObject(o);
+        }
         
         // Wysyłanie z powrotem wejść od wszystkich klientów.
         packOutToClient.addFeedbacks(arrayWithDataFromPlayers);
@@ -248,6 +283,7 @@ public class ServerGame extends Game {
     //HashMap <Integer,KeyboardControlRemote> keyboardControlRemote;
     
     int playersConnected = 0;
+    boolean gameStarted;
     
     MyServer server;
 }

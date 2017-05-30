@@ -9,11 +9,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import pacman.Game;
-import gameObjects.GameObject;
 import java.io.Serializable;
 import java.net.URL;
 import pacman.Sprite;
+
+import gameObjects.GameObject;
+import pacman.*;
 
 // Od teraz, w tej klasie jest wszystko związane z ustawieniami Menu.
 
@@ -33,6 +34,11 @@ public class MenuControl {
     {return game.createObject(ourClass);}
     
     public void gotoMenu(String which){
+        for (GameObject o : game.getAllObjects(MenuObject.class))
+        {o.destroy();}
+        for (GameObject o : game.getAllObjects(TextObject.class))
+        {o.destroy();}
+        
         switch (which){
             case "start":{
                 startMenu();
@@ -56,6 +62,10 @@ public class MenuControl {
             break;
             case  "join_game":{
                 joinGameMenu();
+            }
+            break;
+            case  "game_lobby":{
+                gameLobbyMenu();
             }
             break;
             //case "display_connected_players": {
@@ -189,8 +199,6 @@ public class MenuControl {
         menu.setFont("pac_font_sprites",8,8);
         menu.setTitle("CREATE GAME");
         
-        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
-        
         /* Prócz uruchomienia servera trzeba tutaj uruchomić jednego klienta lokalnie */
         menu.addMenuOption("Start", ()-> {
             game.getExecutor().submit(game.callableStartSever);
@@ -204,7 +212,7 @@ public class MenuControl {
             return 1;
         });
         
-        menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 2, 4);
+        menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 1, 4);
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addNumberInputOption("Port: ",null,Game.portString,null,4);
 
@@ -224,7 +232,6 @@ public class MenuControl {
         menu.setTitle("JOIN GAME");
 
         //menu.addNumberInputOption("IP: ",null,ipString,"xxx.xxx.x.xx",9);
-        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
         menu.addMenuOption("Join",() -> {
             // TODO - UWAGA - na koniec wywalić poniższą linijkę, bo docelowo ma być bez zmian!!!
             // TODO - takie jak zostało odczytane z MENU !!!
@@ -248,6 +255,31 @@ public class MenuControl {
         });
         menu.addButtonPressOption("exitOnQ",()-> {
             gotoMenu("server_setup");
+            return 1;
+        }, "q" );
+    }
+    
+    private void gameLobbyMenu() {
+        
+        MenuObject menu = (MenuObject)createObject(MenuObject.class);
+        menu.setFont("pac_font_sprites",8,8);
+        menu.setTitle("JOIN GAME");
+
+        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
+        menu.addMenuOption("READY",() -> {
+            
+            ClientGame clientGame = (ClientGame)game;
+            clientGame.setReady(true);
+            gotoMenu("game_lobby");
+            
+            return 1;
+        });
+        menu.addMenuOption("Exit Server", () -> {
+            game.close();
+            return 1;
+        });
+        menu.addButtonPressOption("exitOnQ",()-> {
+            game.close();
             return 1;
         }, "q" );
     }

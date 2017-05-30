@@ -600,4 +600,20 @@ public class Game extends Thread
     public ExecutorService getExecutor() {
         return executor;
     }
+    
+    public ArrayList<Integer> getPlayerIds() {
+        ArrayList<Integer> sortedIds = new ArrayList<>();
+        for (int id : playerNumbers.keySet()) {
+            sortedIds.add(playerNumbers.get(id),id);
+        }
+        return sortedIds;
+    }
+    
+    public String getPlayerName(int id) {
+        return playerNames.get(id);
+    }
+    
+    public int getPlayerCharacter(int id) {
+        return playerCharacters.get(id);
+    }
 }

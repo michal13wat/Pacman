@@ -30,22 +30,7 @@ public class TextObject extends GameObject implements Serializable {
         if (visible == false)
         {return;}
         
-        int c = 0, tmp_x = 0, tmp_y = 0;
-        Point fontPos = null;
-        
-        for (int i = 0; i < ourText.length(); i ++) {
-            c = ourText.charAt(i);
-            
-            if (c == '\n') {
-                tmp_x = 0;
-                tmp_y += fontHeight;
-            }
-            else {
-                fontPos = charToPos(c);
-                drawSprite(graphics,getSprites(font),x+tmp_x,y+tmp_y,fontPos.x,fontPos.y,fontWidth,fontHeight);
-                tmp_x += fontWidth;
-            }
-        }
+        drawMyText(graphics);
     }
     
     @Override
@@ -58,7 +43,7 @@ public class TextObject extends GameObject implements Serializable {
         setScale(scaleMod);
         
         visible = true;
-        drawEvent(graphics);
+        drawMyText(graphics);
         visible = false;
     }
     
@@ -99,10 +84,34 @@ public class TextObject extends GameObject implements Serializable {
             case '>': return new Point(19,3);
             case '?': return new Point(20,3);
             case '_': return new Point(25,2);
-            case '`': return new Point(21,3); // Symbol PacMan'a.
+            case 201: return new Point(21,3); // Symbol PacMan'a.);
+            case 202: return new Point(22,3); // Czerwony duszek.
+            case 203: return new Point(23,3); // Żółty duszek.
+            case 204: return new Point(24,3); // Niebieski duszek.
+            case 205: return new Point(25,3); // Różowy duszek.
         }
         
         return new Point(10,2);
+    }
+    
+    protected void drawMyText(Graphics2D graphics) {
+        
+        int c = 0, tmp_x = 0, tmp_y = 0;
+        Point fontPos = null;
+        
+        for (int i = 0; i < ourText.length(); i ++) {
+            c = ourText.charAt(i);
+            
+            if (c == '\n') {
+                tmp_x = 0;
+                tmp_y += fontHeight;
+            }
+            else {
+                fontPos = charToPos(c);
+                drawSprite(graphics,getSprites(font),x+tmp_x,y+tmp_y,fontPos.x,fontPos.y,fontWidth,fontHeight);
+                tmp_x += fontWidth;
+            }
+        }
     }
 
     protected String ourText, ourPrefix, ourPostfix;

@@ -39,8 +39,8 @@ public class GhostObject extends CharacterObject implements Serializable {
         if (game.getGhostPlayer(myColor) >= 0) {
             isPlayed = true;
             playerId = game.getGhostPlayer(myColor);
-            game.setPlayedGhostCreated(true);
-            createPin("P1");
+            //game.setPlayedGhostCreated(true);
+            //createPin("P1");
         }
         else isPlayed = false;
     }
@@ -182,5 +182,9 @@ public class GhostObject extends CharacterObject implements Serializable {
     
     public void scare(int time) {
         scareCounter = time;
+    }
+    
+    public int getColor() {
+        return myColor;
     }
 }
