@@ -1,5 +1,6 @@
 package _serverV2;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -19,7 +20,8 @@ public class ServerSender extends Thread {
 	}
 
 	public void run() {
-		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());) 
+		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                     BufferedOutputStream bos = new BufferedOutputStream(out);) 
 		{
             int pseudoTimer = 0;
 			System.out.println("ServerSender in thread " + thradID + " estabilished.");
@@ -29,7 +31,8 @@ public class ServerSender extends Thread {
                     out.reset();
 
                     //ServerBrain.packOut.setAdditionalInfo(temp);
-                    out.writeObject(ServerBrain.packOut);
+                    //out.writeObject(ServerBrain.packOut);
+                    out.write(ServerBrain.bytesOut);
                     //Thread.sleep(5);
                     out.flush();
                     ServerBrain.lockBufferingToSendByThisThread(thradID);
@@ -46,7 +49,7 @@ public class ServerSender extends Thread {
 
                     ServerBrain.packOut.setNotConnectedClients(ServerBrain.notConnectedClients);
                     ServerBrain.packOut.setConnectedClients(ServerBrain.connectedClients);
-                    out.writeObject(ServerBrain.packOut);
+                    out.write(ServerBrain.bytesOut);
                     //Thread.sleep(5);
                     out.flush();
                     pseudoTimer = 0;
@@ -58,7 +61,7 @@ public class ServerSender extends Thread {
 		} catch (IOException e) {
 			try {
 				socket.close();
-				System.out.println("ServerSender in thread: " + thradID + " stopped.");
+				System.out.println("ServerSender in thread: " + thradID + " stopped: " + e.getMessage());
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}

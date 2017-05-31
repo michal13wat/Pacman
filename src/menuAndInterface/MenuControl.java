@@ -200,8 +200,8 @@ public class MenuControl {
             Game.ipString.value = "localhost";
             //portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
             Game.playerNumber.value = 0;
-            game.getExecutor().submit(game.callableStartClient);
-            game.halt();
+            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
+            
             gotoMenu("start");
             return 1;
         });
@@ -235,8 +235,7 @@ public class MenuControl {
             //Game.ipString.value = "localhost";
 //            portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
 //            playerNumber.value - takie jak zostało odczytane z MENU, czyli bez zmian
-            game.getExecutor().submit(game.callableStartClient);
-            game.halt();
+            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
 
             while (true){} // TODO - wywalić to (zablokuj grę)
             //gotoMenu("start");

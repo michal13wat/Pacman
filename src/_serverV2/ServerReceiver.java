@@ -27,7 +27,8 @@ public class ServerReceiver extends Thread {
                 try {
                     packIn = (clientAndServer.PackToSendToServer)in.readObject();
                     ServerBrain.recPacks.addLast(packIn);
-                    System.out.print("Client ID = " + packIn.getPlayersId() + " press button: " + packIn.getPressedKey() + "\n");
+                    //System.out.print("Client ID = " + packIn.getPlayersId() + " " + packIn.getPlayersName()
+                    //        + " press button: " + packIn.getPressedKey() + "\n");
                 } catch (IOException | ClassNotFoundException e){
                     e.printStackTrace();
                     break;

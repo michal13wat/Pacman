@@ -428,29 +428,29 @@ public class Game extends Thread
     };
 
     public Callable<Void> callableStartClient = () -> {
-        startClient(ipString.value, new Integer(portString.value), playerNumber.value);
+        startClient(ipString.value, portString.value, playerNumber.value);
         return null;
     };
     
-    protected void startClient(String addressIP, int port, int playerID){
-        clientBrain = new _clientV2.ClientBrain(addressIP, port, port + 1,
+    public void startClient(String addressIP, String port, int playerID){
+        /*clientBrain = new _clientV2.ClientBrain(addressIP, port, port + 1,
                 playerName.value, playerID);
-        clientBrain.start();
+        clientBrain.start();*/
 
         //gotoMenu("display_connected_players");
-        while (true){}  // zablokoowanie programu
+        //while (true){}  // zablokoowanie programu
 
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
-        //clientGame = new ClientGame(gameWindow,gameRenderer,playerName);
-        //clientGame.init();
+        clientGame = new ClientGame(gameWindow,gameRenderer,playerName.value);
+        clientGame.init();
     }
 
     protected void  startServer(){
         int port = new Integer(portString.value);
-        serverBrain = new _serverV2.ServerBrain(port, port + 1, playersAmount.value);
-        serverBrain.start();
+        //serverBrain = new _serverV2.ServerBrain(port, port + 1, playersAmount.value);
+        //serverBrain.start();
 
-        String temp;
+        /*String temp;
 
         try{
             Scanner sc = new Scanner(new File("src\\resources\\KrotnieDane5K.txt"));
@@ -489,7 +489,7 @@ public class Game extends Thread
                      sendPrevPack  i  readPrevPack, które są odpowiedzialne za synchronizację
                      i blokowanie wątków. Niestety nie potrafię sobie z tym poradzić
                     * */
-                    try{
+                    /*try{
                         Thread.sleep(20);
                     }catch (InterruptedException e) {
                         e.printStackTrace();
@@ -499,12 +499,12 @@ public class Game extends Thread
             System.out.println("Czytanie z pliku zakończone!");
         }catch (FileNotFoundException e){
             System.out.println("=========  Otwieranie pliku nie powiodło się!");
-        }
-        while (true){}      // TODO - wywalić to
+        }*/
+        //while (true){}      // TODO - wywalić to
 
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
-        //serverGame = new ServerGame(portString,playersAmount);
-        //serverGame.init();
+        serverGame = new ServerGame(portString,playersAmount);
+        serverGame.init();
         /*int port = new Integer(portString.value);
         listening = true;
         MyServer server = new MyServer(port, playersAmount.value);*/

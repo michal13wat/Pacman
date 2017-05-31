@@ -4,7 +4,6 @@ package pacman;
 import clientAndServer.MyServer;
 import clientAndServer.PackReceivedFromServer;
 import clientAndServer.PackToSendToServer;
-import clientAndServer.ServerThread;
 import gameObjects.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,6 +17,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import menuAndInterface.TextObject;
 
+import _serverV2.*;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+
 public class ServerGame extends Game {
     
     public ServerGame(StringWrapper portString, IntWrapper playersAmount) {
@@ -27,6 +30,7 @@ public class ServerGame extends Game {
     
     @Override
     public void init(){
+        System.out.println("Inicjalizacja ServerGame.");
         // Parametry gry.
         running = true;
         
@@ -48,12 +52,11 @@ public class ServerGame extends Game {
         
         int port = new Integer(Game.portString.value);
         listening = true;
-        server = new MyServer(port, playersAmount.value);
-        /*TestObjectToSend testObj = new TestObjectToSend();
-        ArrayList<TestObjectToSend> objList = new ArrayList<>();*/
-        ServerThread.setServerIntoUnlockMode();
+        
+        server = new ServerBrain(port, port+1, playersAmount.value);
+        server.start();
+        
         packOutToClient = new PackReceivedFromServer<>();
-        //while (listening) {}
         
         //gotoMenu("test");
         LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
@@ -65,6 +68,7 @@ public class ServerGame extends Game {
         o.setText("AAA");*/
         
         globalCounter = 0;
+        System.out.println("Inicjalizacja ServerGame zakończona.");
         gameLoop();
     }
     
@@ -84,10 +88,10 @@ public class ServerGame extends Game {
                 for (int i = 0; i < 1; i++)
                 {gameStep();}
                 
-                if (ServerThread.getObjReceived() != null) {
+                //if (ServerBrain.getObjReceived() != null) {
                     receiveInput();
                     sendObjects();
-                }
+                //}
                 
                 nextStep += framesSkip;
                 globalCounter ++;
@@ -97,16 +101,22 @@ public class ServerGame extends Game {
             }
         }
         
+        try {
+            server.disconnectAll();
+            server.close();
+        }
+        catch (Exception e) {}
+        
         System.out.println("Server closing!");
-        server.close();
     }
     
     protected void receiveInput() {
         // odbieranie obiektu
-        putToArrayDataReceivedFromServer(ServerThread.getObjReceived());
+        for (PackToSendToServer pack : ServerBrain.recPacks)
+            putToArrayDataReceivedFromServer(pack);
         
         for (PackToSendToServer pack : arrayWithDataFromPlayers){
-            if (!playerNumbers.containsKey(pack.getPlayersId())) {
+            if ((!playerNumbers.containsKey(pack.getPlayersId())) && (pack.getPlayersId() > 0)) {
                 // NOWY GRACZ SIĘ PODŁĄCZYŁ!!!
                 System.out.print("NOWY GRACZ!!! - name = " + pack.getPlayersName() + "\n");
                 
@@ -123,8 +133,8 @@ public class ServerGame extends Game {
                 System.out.println("new remote keyboard - " + i);
             }
             
-            System.out.print("SERWER - name = " + pack.getPlayersName() + " id = " + pack.getPlayersId()
-            + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
+            //System.out.print("SERWER - name = " + pack.getPlayersName() + " id = " + pack.getPlayersId()
+            //+ " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
             
             // Ustawianie odpowiednich wejść z klawiatury.
             ((KeyboardControlRemote)getKeyboard(pack.getPlayersId())).feedInput(pack.getPressedKey());
@@ -133,11 +143,11 @@ public class ServerGame extends Game {
         // Usunięte gdyż:
         // Za bardzo zaśmiecało konsolę.
         
-        /*System.out.print("Name = " + ServerThread.getObjReceived().getPlayersName()
-                + ", Character = " + ServerThread.getObjReceived().getCharacter()
-                + ", PressedKey = " + ServerThread.getObjReceived().getPressedKey() + "\n");*/
+        /*System.out.print("Name = " + assdfsdf.getObjReceived().getPlayersName()
+                + ", Character = " + assdfsdf.getObjReceived().getCharacter()
+                + ", PressedKey = " + assdfsdf.getObjReceived().getPressedKey() + "\n");*/
         
-        ServerThread.setObjReceived(null);
+        //assdfsdf.setObjReceived(null);
     }
     
     protected synchronized void sendObjects() {
@@ -147,9 +157,9 @@ public class ServerGame extends Game {
         // to tylko symulacja.
         
         /*testObj.ilosc = 0;
-        testObj.nazwa = ("asdf " +  ServerThread.getObjReceived().getPlayersName()
-                + " hwdp " + ServerThread.getObjReceived().getCharacter()
-                + " jp100 " + ServerThread.getObjReceived().getPressedKey() );
+        testObj.nazwa = ("asdf " +  assdfsdf.getObjReceived().getPlayersName()
+                + " hwdp " + assdfsdf.getObjReceived().getCharacter()
+                + " jp100 " + assdfsdf.getObjReceived().getPressedKey() );
         objList.clear();
         for (int i = 0; i < 4; i ++){
             objList.add(testObj);
@@ -172,7 +182,7 @@ public class ServerGame extends Game {
         try {
             // TUTAJ SERIALIZUJEMY,
             // Gdyż (ponoć) serializacja nie jest bezpieczna dla wątków.
-            // I rzeczywiście, jak zostawiłem to w ServerThread i tutaj
+            // I rzeczywiście, jak zostawiłem to w assdfsdf i tutaj
             // odpalałem gameStep, to co chwila się wywracał.
             out = new ObjectOutputStream(bos);   
             out.writeObject(packOutToClient);
@@ -181,8 +191,10 @@ public class ServerGame extends Game {
             byte[] bytesToSend = bos.toByteArray();
             bos.close();
             
-            System.out.println(bytesToSend);
-            ServerThread.setObjToSend(packOutToClient,bytesToSend);
+            //System.out.println(bytesToSend);
+            
+            ServerBrain.packOut = packOutToClient;
+            ServerBrain.bytesOut = bytesToSend;
         }
         catch (IOException ex) {}
     }
@@ -204,7 +216,7 @@ public class ServerGame extends Game {
             arrayWithDataFromPlayers.add(packReceivedFromclient);
             packOutToClient.addConnectedClient(packReceivedFromclient.getPlayersName());
             packOutToClient.setNotConnectedClients(MyServer.getClientAmount()
-                    - ServerThread.getConnectedClients());
+                    - ServerBrain.connectedClients.size());
         }
         else{
             arrayWithDataFromPlayers.set(positionInArray, packReceivedFromclient);
@@ -233,5 +245,5 @@ public class ServerGame extends Game {
     
     int playersConnected = 0;
     
-    MyServer server;
+    ServerBrain server;
 }

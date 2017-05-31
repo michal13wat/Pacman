@@ -1,6 +1,7 @@
 
 package pacman;
 
+import _clientV2.ClientBrain;
 import clientAndServer.Client;
 import clientAndServer.PackReceivedFromServer;
 import clientAndServer.PackToSendToServer;
@@ -21,10 +22,10 @@ import static pacman.Game.portString;
 
 public class ClientGame extends Game {
     
-    public ClientGame(JFrame gameWindow, JPanel gameRenderer, StringWrapper playerName) {
+    public ClientGame(JFrame gameWindow, JPanel gameRenderer, String playerName) {
         this.gameWindow = gameWindow;
         this.gameRenderer = gameRenderer;
-        this.playerName = playerName;
+        this.playerName = new StringWrapper(playerName);
         //this.ipString = ipString;
         //this.portString = portString;
         //this.playerNumber = playerNumber;
@@ -32,6 +33,8 @@ public class ClientGame extends Game {
     
     @Override
     public void init(){
+        System.out.println("Inicjalizacja ClientGame.");
+        
         Random random = new Random();
         clientId = (int)Math.abs(random.nextInt());
         random = null;
@@ -57,10 +60,28 @@ public class ClientGame extends Game {
         String addressIP = Game.ipString.value;
         String port = Game.portString.value;
         int playerID = Game.playerNumber.value;
-        client = new Client(addressIP, new Integer(port), playerID);
+        
+        int portInteger = new Integer(port);
+        
+        client = new ClientBrain(addressIP, portInteger, portInteger+1, playerName.value, playerID);
+        client.start();
         
         globalCounter = 0;
+        System.out.println("Inicjalizacja ClientGame zakończona.");
         gameLoop();
+    }
+    
+    protected void wrapperInit() {
+
+        startingLives = new IntWrapper(3);
+        playersAmount = new IntWrapper(4);
+        playerNumber = new IntWrapper(1);
+        isPacmanPlayed = new IntWrapper(0);
+        
+        pacmanPlayer = new IntWrapper(-1);
+        ghostPlayer = new IntWrapper[4];
+        for (int i = 0; i < 4; i++)
+            ghostPlayer[i] = new IntWrapper(-1);
     }
     
     @Override
@@ -116,7 +137,7 @@ public class ClientGame extends Game {
         // TODO - zrobić jak będzie działał wybór postaci
         character = 0;
         pressedKey = checkPressedKeys();
-        System.out.println("KLIENT " + name + " " + pressedKey);
+        //System.out.println("KLIENT " + name + " " + pressedKey);
         
         // TODO - wywalić to opóźnienie
         
@@ -128,15 +149,15 @@ public class ClientGame extends Game {
             e.printStackTrace();
         }*/
         
-        client.setObjToSendToServer(new PackToSendToServer(name, character, pressedKey, clientId));
+        client.packOut = new PackToSendToServer(name, character, pressedKey, clientId);
     }
     
     protected void receiveObjects()
     {
         // odebranie obiektów od serwera i symulacja wyświetlenia obiektów na mapie
-        while (!client.getListInputPackages().isEmpty()) {
-            packReceivedFromServer = client.getListInputPackages().getLast();
-            client.getListInputPackages().removeLast();
+        if (ClientBrain.recPac != null) {
+            packReceivedFromServer = ClientBrain.recPac;
+            ClientBrain.recPac = null;
 //                ArrayList<TestObjectToSend> objList = temp.getObjectsList();
 //                for (TestObjectToSend obj : objList){
 //                    System.out.print("objReceivedFromServer.ilosc = " + obj.ilosc
@@ -214,6 +235,6 @@ public class ClientGame extends Game {
     
     static volatile PackReceivedFromServer<GameObject> packReceivedFromServer;
     
-    Client client;
+    ClientBrain client;
     int clientId;
 }

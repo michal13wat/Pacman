@@ -7,6 +7,8 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import gameObjects.GameObject;
+
 public class ServerBrain extends Thread {
 
     public static int clientAmount; // = 4;
@@ -19,12 +21,16 @@ public class ServerBrain extends Thread {
 
     public static LinkedBlockingDeque<clientAndServer.PackToSendToServer> recPacks
             = new LinkedBlockingDeque<>();
-    // TODO - poniżej zmienić TestObjectToSend na GameObject, czy co tam ma być przesyłane
-    public static clientAndServer.PackReceivedFromServer<TestObjectToSend> packOut
+    
+    public static clientAndServer.PackReceivedFromServer<GameObject> packOut
             = new clientAndServer.PackReceivedFromServer<>();
+    public static byte[] bytesOut;
+    
     public volatile static ArrayList<Boolean> sendPrevPack = new ArrayList<>();
     public volatile static ArrayList<Boolean> readPrevPack = new ArrayList<>();
 
+    boolean running = true;
+    
     public ServerBrain(int recPort, int brcPort, int clientAmount) {
         System.out.println("Server starting...");
         this.recPort = recPort;
@@ -40,7 +46,7 @@ public class ServerBrain extends Thread {
         System.out.println("Listening for connections.");
         try (ServerSocket serverSocket = new ServerSocket(recPort);
              ServerSocket broadcastSocket = new ServerSocket(brcPort);) {
-            while (true) {
+            while (running) {
                 if (!checkIfAllClientsAreConnected()) {
                     sendPrevPack.add(Boolean.TRUE);
                     readPrevPack.add(Boolean.FALSE);
@@ -64,6 +70,8 @@ public class ServerBrain extends Thread {
         }
     }
 
+    public void close() {running = false;}
+    
     public static void disconnectAll() throws InterruptedException {
         for (int i = 0; i < clientList.size(); i++) {
             clientList.get(i).closeSocket();

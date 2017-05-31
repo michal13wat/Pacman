@@ -14,21 +14,23 @@ public class ClientBrain extends Thread {
     public ClientReceiver receiver;
     public PackToSendToServer packOut
             = new PackToSendToServer("name", 0, "direction", 0);  // jakiś tam testowy pakiet na początek
-    public static clientAndServer.PackReceivedFromServer<clientAndServer.TestObjectToSend> recPac;
+    public static clientAndServer.PackReceivedFromServer<gameObjects.GameObject> recPac;
     public static volatile ArrayList<String> connectedClientsBuffer = new ArrayList<>();
     public static volatile int notConnectedClientsAmountBuffer = -1;
     private volatile String addressIP;
     private volatile int portSending;
     private volatile int portReceiving;
 
+    boolean running = true;
+    
     public ClientBrain(String addressIP, int portSending, int portReceving,
                        String clientName, int clientID){
         System.out.println("Client starting");
-
+        
         this.addressIP = precessAddressIP(addressIP);
         this.portSending = portSending;
         this.portReceiving = portReceving;
-
+        
         System.out.println("Klient podłącza się do adresu: " + this.addressIP);
         System.out.println("Klient podłącza się na porcie: " + this.portSending);
         //"127.0.0.1"
@@ -49,14 +51,16 @@ public class ClientBrain extends Thread {
     public void run() {
         String keyName;
         Scanner keyboard = new Scanner(System.in);
-        while (true){
+        while (running){
             clientSender.setPackOut(packOut);
-            System.out.println("Podaj nazwę klawisza do wysłania do serwara: ");
+            /*System.out.println("Podaj nazwę klawisza do wysłania do serwara: ");
             keyName = keyboard.next();
-            packOut.setPressedKey(keyName);
+            packOut.setPressedKey(keyName);*/
         }
     }
 
+    public void close() {running = false;}
+    
     public synchronized static void writeToBufConnClients(ArrayList<String> recConnClients, int notConnected){
         for(int i = 0; i < recConnClients.size(); i++){
             if(!connectedClientsBuffer.contains(recConnClients.get(i))){
