@@ -36,10 +36,10 @@ public class ClientReceiver extends Thread {
                         + _clientV2.ClientBrain.recPac.getNotConnectedClients() + "\n");
 			}
 		} catch (UnknownHostException e) {
-//			System.err.println("Don't know about host " + hostName + "at BrcCl");
+			System.err.println("Don't know about host " + hostName + "at BrcCl");
 			//System.exit(1);
 		} catch (IOException e) {
-//			System.err.println("Couldn't get I/O for the connection to " + hostName + " at BrcCl");
+			System.err.println("Couldn't get I/O for the connection to " + hostName + " at BrcCl");
 //			data = null;
 			broadcastListening = false;
 		} catch (ClassNotFoundException e) {

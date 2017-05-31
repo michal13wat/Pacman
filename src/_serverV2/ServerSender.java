@@ -21,22 +21,23 @@ public class ServerSender extends Thread {
 
 	public void run() {
 		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                     BufferedOutputStream bos = new BufferedOutputStream(out);) 
+                     //BufferedOutputStream bos = new BufferedOutputStream(out);
+                        ) 
 		{
-            int pseudoTimer = 0;
-			System.out.println("ServerSender in thread " + thradID + " estabilished.");
-			while (loopdaloop) {
-                out.flush();
-				if(!ServerBrain.checkIfPackWasSendByThisThread(thradID)){
-                    out.reset();
-
-                    //ServerBrain.packOut.setAdditionalInfo(temp);
-                    //out.writeObject(ServerBrain.packOut);
-                    out.write(ServerBrain.bytesOut);
-                    //Thread.sleep(5);
+                    int pseudoTimer = 0;
+                    System.out.println("ServerSender in thread " + thradID + " estabilished.");
+		while (loopdaloop) {
                     out.flush();
-                    ServerBrain.lockBufferingToSendByThisThread(thradID);
-                    ServerBrain.thisThreadReadPackToSend(thradID);  // readPrevPack = false;
+                    if(!ServerBrain.checkIfPackWasSendByThisThread(thradID)){
+                        out.reset();
+
+                        //ServerBrain.packOut.setAdditionalInfo(temp);
+                        //bos.writeObject(ServerBrain.packOut);
+                        out.writeUnshared(ServerBrain.packOut);
+                        //Thread.sleep(5);
+                        out.flush();
+                        ServerBrain.lockBufferingToSendByThisThread(thradID);
+                        ServerBrain.thisThreadReadPackToSend(thradID);  // readPrevPack = false;
                 }
                 //////////////////////////////////////////////////////////////////
                 //      UWGAA - POD ŻADNYM POZOREM NIE WYWALAĆ STĄD             //
@@ -49,7 +50,13 @@ public class ServerSender extends Thread {
 
                     ServerBrain.packOut.setNotConnectedClients(ServerBrain.notConnectedClients);
                     ServerBrain.packOut.setConnectedClients(ServerBrain.connectedClients);
-                    out.write(ServerBrain.bytesOut);
+                    if(ServerBrain.bytesOut != null){
+                        // TODO - odkomentować linijke poniżej !!!
+                        //out.write(ServerBrain.bytesOut);
+                        out.writeUnshared(ServerBrain.packOut);
+                    }else {
+                        System.out.println("=========  Pusty bufor z danymi wyjściowymi!!!  =========");
+                    }
                     //Thread.sleep(5);
                     out.flush();
                     pseudoTimer = 0;

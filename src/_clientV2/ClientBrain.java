@@ -79,6 +79,9 @@ public class ClientBrain extends Thread {
     }
 
     private String precessAddressIP(String addressIP){
+        if (addressIP == "localhost"){
+            return addressIP;
+        }
         int length = addressIP.length();
         String IP = new String();
         if (length < 8 || length > 11){

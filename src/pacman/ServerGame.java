@@ -19,6 +19,7 @@ import menuAndInterface.TextObject;
 
 import _serverV2.*;
 import java.io.ByteArrayInputStream;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 
 public class ServerGame extends Game {
@@ -191,12 +192,22 @@ public class ServerGame extends Game {
             byte[] bytesToSend = bos.toByteArray();
             bos.close();
             
+            //PackReceivedFromServer packClone = deserialize(bytesToSend);
+            
+            //Hello h2;
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytesToSend);
+            ObjectInput in = new ObjectInputStream(bis);
+            PackReceivedFromServer packClone = (PackReceivedFromServer) in.readObject();
+            
+            
             //System.out.println(bytesToSend);
             
-            ServerBrain.packOut = packOutToClient;
+            ServerBrain.packOut = packClone;
             ServerBrain.bytesOut = bytesToSend;
         }
-        catch (IOException ex) {}
+        catch (IOException | ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
     }
     
     synchronized protected void putToArrayDataReceivedFromServer
