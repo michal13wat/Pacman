@@ -119,7 +119,7 @@ public class MenuControl {
         sprites.add(new Sprite("pac_font_sprites",25,3,8,8));*/
         stageSelectMenu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
         stageSelectMenu.addSpinnerOption("Lives ",null,game.startingLives,1,5);
-        stageSelectMenu.addSpinnerOption("Ghosts ", null, game.playersAmount, 1, 4);
+        stageSelectMenu.addSpinnerOption("Ghosts ", null, game.ghostsAmount, 1, 4);
 
         // Ładowanie wszystkich plików .txt z "/resources/stages" jako poziomy.
         try
@@ -263,7 +263,7 @@ public class MenuControl {
         
         MenuObject menu = (MenuObject)createObject(MenuObject.class);
         menu.setFont("pac_font_sprites",8,8);
-        menu.setTitle("JOIN GAME");
+        menu.setTitle("GAME LOBBY");
 
         menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
         menu.addMenuOption("READY",() -> {

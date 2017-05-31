@@ -101,6 +101,7 @@ public class Game extends Thread
 
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
+        ghostsAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
 
         pacmanPlayer = new IntWrapper(-1);
@@ -347,6 +348,7 @@ public class Game extends Thread
     public void chooseCharacter(boolean resetPreviousChoices, int forPlayer) {
         // Przetwarza wartości z chosenCharacter na wybór konkretnej postaci
         // dla konkretnego gracza. Odpala odpowiednie metody u postaci, aby zatwierdzić.
+        System.out.println("Przypisywanie postaci rozpoczęte.");
         
         if (resetPreviousChoices) {
             pacmanPlayer.value = -1;
@@ -356,10 +358,12 @@ public class Game extends Thread
         
         if (chosenCharacter.value == 0) {
             // Wybraliśmy Pacmana.
+            System.out.println("Pacman przypisany dla gracza " + forPlayer);
             pacmanPlayer.value = forPlayer;
         }
         else if (chosenCharacter.value > 0) {
             // Wybraliśmy któregoś z duchów.
+            System.out.println("Duszek przypisany dla gracza " + forPlayer);
             ghostPlayer[chosenCharacter.value-1].value = forPlayer;
         }
         
@@ -367,6 +371,8 @@ public class Game extends Thread
             ((PacmanObject)o).setPlayed();
         for (GameObject o : getAllObjects(GhostObject.class))
             ((PacmanObject)o).setPlayed();
+        
+        System.out.println("Przypisywanie postaci zakończone.");
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -503,6 +509,7 @@ public class Game extends Thread
 
     public IntWrapper startingLives;
     public IntWrapper playersAmount;
+    public IntWrapper ghostsAmount;
     
     public IntWrapper pacmanPlayer;
     public IntWrapper[] ghostPlayer;
@@ -525,6 +532,7 @@ public class Game extends Thread
     HashMap <Integer,Integer> playerNumbers;
     HashMap <Integer,String> playerNames;
     HashMap <Integer,Integer> playerCharacters;
+    HashMap <Integer,Boolean> playerReady;
     
     //////////////////////////////////////////////////////////////////////
     // Akcesory i inne śmieci.
@@ -564,6 +572,10 @@ public class Game extends Thread
     }
     
     public int getNumberOfGhosts(){
+        return ghostsAmount.value;
+    }
+    
+    public int getMaxPlayers(){
         return playersAmount.value;
     }
     
@@ -604,7 +616,8 @@ public class Game extends Thread
     public ArrayList<Integer> getPlayerIds() {
         ArrayList<Integer> sortedIds = new ArrayList<>();
         for (int id : playerNumbers.keySet()) {
-            sortedIds.add(playerNumbers.get(id),id);
+            if (playerReady.get(id) == true)
+                sortedIds.add(/*playerNumbers.get(id),*/id);
         }
         return sortedIds;
     }

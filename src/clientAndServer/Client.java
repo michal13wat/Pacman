@@ -46,6 +46,8 @@ public class Client extends Thread {
         }catch (SocketException e){
             System.out.print("Złapano wyjątek związany z timeout-em w kliencie\n");
         }
+        setName("CLIENT");
+        
         start();
     }
 

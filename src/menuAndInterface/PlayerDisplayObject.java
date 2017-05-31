@@ -18,14 +18,22 @@ public class PlayerDisplayObject extends TextObject {
         if (visible == false)
         {return;}
         ClientGame clientGame = null;
+        int playersLockedIn = game.getPlayerIds().size();
         if (game instanceof ClientGame)
-        {clientGame = (ClientGame)game;}
+        {
+            clientGame = (ClientGame)game;
+            if (clientGame.isReady()) playersLockedIn++;
+        }
         
         int k = 1;
         x = xstart;
         y = ystart;
         
-        ourText = "Players:";
+        if (!allConnected)
+            ourText = "Players (" + playersLockedIn + "/" + game.getMaxPlayers() + "):";
+        else
+            ourText = "Players:";
+        
         drawMyText(graphics);
         
         if ((clientGame != null) && (clientGame.isReady())) {
@@ -38,17 +46,29 @@ public class PlayerDisplayObject extends TextObject {
             k++;
         }
         
-        for (Integer id : game.getPlayerIds()) {
-            // Rysujemy wpis danego gracza na odpowiedniej pozycji.
-            int character = game.getPlayerCharacter(id);
-            String nick = game.getPlayerName(id);
-            
-            y = ystart + k*fontHeight;
-            
-            ourText = k + " - " + nick + " " + (201+character);
-            drawMyText(graphics);
-            
-            k++;
+        //System.out.println("YARE YARE");
+        
+        try {
+            for (Integer id : game.getPlayerIds()) {
+                
+                // Rysujemy wpis danego gracza na odpowiedniej pozycji.
+                int character = game.getPlayerCharacter(id);
+                String nick = game.getPlayerName(id);
+
+                y = ystart + k*fontHeight;
+
+                ourText = k + " - " + nick + " " + (char)(201+character);
+                drawMyText(graphics);
+
+                k++;
+            }
         }
+        catch (Exception e) {System.out.println(e.getMessage());}
     }
+    
+    public void setAllConnected() {
+        allConnected = true;
+    }
+    
+    boolean allConnected = false;
 }

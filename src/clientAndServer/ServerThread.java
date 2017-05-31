@@ -40,6 +40,8 @@ public class ServerThread extends Thread {
         for (int i = 0; i < verifySendObject.length; i++){
             verifySendObject[i] = false;
         }
+        
+        setName("SERVER THREAD " + threadNum);
     }
 
     public ServerThread(SocketChannel socket, int port) {

@@ -25,6 +25,7 @@ public class PackReceivedFromServer<T> implements Serializable {
     // Wartości z wrapperów.
     public int gameScore;
     public int gameLives;
+    public int maxPlayers;
     
     // Czy aby na pewno???
     private ArrayList<PackToSendToServer> clientFeedback = new ArrayList<>();
@@ -82,7 +83,7 @@ public class PackReceivedFromServer<T> implements Serializable {
     public Random getRandomizer() {
         return randomizer;
     }
-
+    
     public void addConnectedClient(String name){
         this.connectedClients.add(name);
     }

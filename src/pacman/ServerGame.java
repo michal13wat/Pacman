@@ -46,6 +46,7 @@ public class ServerGame extends Game {
         playerNames = new HashMap<>();
         playerCharacters = new HashMap<>();
         keyboardControlRemote = new HashMap<>();
+        playerReady = new HashMap<>();
         
         int port = new Integer(Game.portString.value);
         listening = true;
@@ -65,6 +66,7 @@ public class ServerGame extends Game {
         PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
         playerDisplay.loadFont("pac_font_sprites",8,8);
         playerDisplay.setPosition(l.getWidth()+16,64);
+        playerDisplay.setAllConnected();
         
         PlayerTagObject tagDisplay = (PlayerTagObject)createObject(PlayerTagObject.class);
         tagDisplay.loadFont("pac_font_sprites",8,8);
@@ -88,6 +90,7 @@ public class ServerGame extends Game {
 
         startingLives = new IntWrapper(3);
         playerNumber = new IntWrapper(1);
+        ghostsAmount = new IntWrapper(4);
 
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
@@ -99,6 +102,7 @@ public class ServerGame extends Game {
     protected void gameLoop() {
         // Konsystentny FPS.
         double nextStep = System.currentTimeMillis();
+        boolean kickstarted = false;
         int loops;
         
         while (running){
@@ -112,8 +116,10 @@ public class ServerGame extends Game {
                 
                 if (ServerThread.getObjReceived() != null) {
                     receiveInput();
-                    sendObjects();
+                    kickstarted = true;
                 }
+                
+                if (kickstarted) sendObjects();
                 
                 nextStep += framesSkip;
                 globalCounter ++;
@@ -142,6 +148,7 @@ public class ServerGame extends Game {
                 playerNames.put(pack.getPlayersId(), pack.getPlayersName());
                 playerCharacters.put(pack.getPlayersId(), pack.getCharacter());
                 keyboardControlRemote.put(pack.getPlayersId(), new KeyboardControlRemote(this));
+                playerReady.put(pack.getPlayersId(),false);
                 
                 // Ustawianie postaci.
                 chosenCharacter.value = pack.getCharacter();
@@ -154,10 +161,18 @@ public class ServerGame extends Game {
             System.out.print("SERWER - name = " + pack.getPlayersName() + ((pack.isPlayerReady()) ? (" [OK] ") : "")
             + " id = " + pack.getPlayersId() + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
             
-            if (!pack.isPlayerReady()) allReady = false;
+            if (pack.isPlayerReady() == true)
+                playerReady.put(pack.getPlayersId(), true);
+            else
+                playerCharacters.put(pack.getPlayersId(), pack.getCharacter());
             
             // Ustawianie odpowiednich wejść z klawiatury.
             ((KeyboardControlRemote)getKeyboard(pack.getPlayersId())).feedInput(pack.getPressedKey());
+        }
+        
+        for (Integer id : playerNumbers.keySet()){
+            if (!playerReady.get(id))
+                allReady = false;
         }
         
         // Jeżeli wszyscy gracze są gotowi, to zaczynamy.
@@ -168,9 +183,10 @@ public class ServerGame extends Game {
             for (int i = 0; i < 4; i++)
                 ghostPlayer[i].value = -1;
             
-            for (PackToSendToServer pack : arrayWithDataFromPlayers){
-                chosenCharacter.value = pack.getCharacter();
-                chooseCharacter(false,pack.getPlayersId());
+            for (Integer id : playerNumbers.keySet()){
+                System.out.println("Gracz " + id + " - " + playerCharacters.get(id));
+                chosenCharacter.value = playerCharacters.get(id);
+                chooseCharacter(false,id);
             }
             
             System.out.println("SERWER - ZACZYNAMY GRĘ!!!");
@@ -220,6 +236,7 @@ public class ServerGame extends Game {
         
         packOutToClient.gameScore = gameScore;
         packOutToClient.gameLives = gameLives;
+        packOutToClient.maxPlayers = playersAmount.value;
         
         // serializacji paczki
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

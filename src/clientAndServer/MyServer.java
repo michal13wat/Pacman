@@ -60,6 +60,8 @@ public class MyServer extends Thread {
         catch (IOException e)
         {System.out.print("SERWER - bląd w tworzeniu głównego wątku serwerowego!\n");}
         
+        setName("SERVER");
+        
         start();
     }
 
