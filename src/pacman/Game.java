@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import gameObjects.*;
+import java.net.URL;
 import javax.imageio.ImageIO;
 import menuAndInterface.*;
 
@@ -54,7 +55,7 @@ public class Game extends Thread
         framesSkip = 1000/framesPerSecond;
         max_render_skip = 10;
         
-        ipString = new StringWrapper("192168110");
+        ipString = new StringWrapper("127.0.0.1");
         portString = new StringWrapper("8080");
         
         wrapperInit();
@@ -76,7 +77,10 @@ public class Game extends Thread
     
     protected void windowInit(boolean fullscreen) {
         // Nowe JFrame z pojedynczym JPanel'em.
-        gameWindow = new JFrame("Testing");
+        gameWindow = new JFrame("PACMAN");
+        
+        URL dirURL = getClass().getResource("/resources/stages");
+        isJar = (dirURL.getProtocol().equals("jar"));
         
         gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -323,12 +327,20 @@ public class Game extends Thread
     // Konkretne metody do różnych celów.
     //////////////////////////////////////////////////////////////////////
     
-    public FileInputStream loadLabyrinth(String fileName) {
+    public InputStream loadLabyrinth(String fileName, boolean fromJar) {
         // Jednorazowe ładowanie labiryntu.
-        FileInputStream fi = null;
+        InputStream fi = null;
         
-        try {fi = new FileInputStream(fileName);}
-        catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        System.out.println("Labirynt: "+fileName);
+        
+        if (fromJar == true) {
+            try {fi = (getClass().getResourceAsStream(fileName));}
+            catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        }
+        else {
+            try {fi = new FileInputStream(fileName);}
+            catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        }
         
         return fi;
     }
@@ -476,6 +488,8 @@ public class Game extends Thread
     //////////////////////////////////////////////////////////////////////
     // Pola obiektu.
     //////////////////////////////////////////////////////////////////////
+    
+    static boolean isJar;
     
     // Podstawowe rzeczy do gry.
     ArrayList<GameObject> objectList;
