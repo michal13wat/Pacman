@@ -265,7 +265,8 @@ public class MenuControl {
         menu.setFont("pac_font_sprites",8,8);
         menu.setTitle("GAME LOBBY");
 
-        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
+        menu.addImageSpinnerOption("Character ", null, game.characterBlocked,
+                                        game.chosenCharacter, 0, 4, sprites);
         menu.addMenuOption("READY",() -> {
             
             ClientGame clientGame = (ClientGame)game;

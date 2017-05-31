@@ -18,6 +18,8 @@ import java.util.ArrayList;
 
 import java.io.*;
 import javax.imageio.ImageIO;
+import pacman.ClientGame;
+import pacman.ServerGame;
 
 public class LabyrinthObject extends GameObject implements Serializable {
     @Override
@@ -72,11 +74,15 @@ public class LabyrinthObject extends GameObject implements Serializable {
             endDisplay.setText("");
             if (counter%10 >= 5) {
                 if (game.getAllObjects(DotObject.class).isEmpty()){
-                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU WIN !!!");
+                    if ((game instanceof ClientGame) || (game instanceof ServerGame))
+                    {endDisplay.setText("PACMAN WINS!!!");endDisplay.setPosition(endDisplay.getX(),48);}
+                    else if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU WIN !!!");
                     else endDisplay.setText("YOU LOSE !!!");
                 }
                 if (game.getLives() == 0) { ////////////////////// TUTAJ SIĘ ZAWIESZA(Ł) SERWER!!!!!!! ///////////////////////////////////////
-                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU LOSE !!!");
+                    if ((game instanceof ClientGame) || (game instanceof ServerGame))
+                    {endDisplay.setText("GHOSTS WIN!!!");endDisplay.setPosition(endDisplay.getX(),48);}
+                    else if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU LOSE !!!");
                     else endDisplay.setText("YOU WIN !!!");
                 }
             }
@@ -166,7 +172,8 @@ public class LabyrinthObject extends GameObject implements Serializable {
         // Inicjalizacja poziomu.
         game.setScore(0);
         game.setLives(game.getStartingLives());
-        if (game.chosenCharacter.value != -1)
+        if ((game.chosenCharacter.value != -1)
+                && !((game instanceof ClientGame) || (game instanceof ServerGame)))
             game.chooseCharacter(true,0);
 
         tileset = "pac_labyrinth_tileset";

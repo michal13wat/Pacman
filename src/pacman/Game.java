@@ -514,6 +514,8 @@ public class Game extends Thread
     public IntWrapper pacmanPlayer;
     public IntWrapper[] ghostPlayer;
     
+    public ArrayList<IntWrapper> characterBlocked;
+    
     int gameScore;
     int gameLives;
     

@@ -88,6 +88,10 @@ public class ClientGame extends Game {
         ghostPlayer = new IntWrapper[4];
         for (int i = 0; i < 4; i++)
             ghostPlayer[i] = new IntWrapper(-1);
+        
+        characterBlocked = new ArrayList<>();
+        for (int i = 0; i < 5; i++)
+            characterBlocked.add(new IntWrapper(0));
     }
     
     @Override
@@ -209,34 +213,38 @@ public class ClientGame extends Game {
             
             for (PackToSendToServer pack : packReceivedFromServer.getClientFeedback()){
                 
-                if (pack.getPlayersId() != clientId) {
-                    if (!playerNumbers.containsKey(pack.getPlayersId())) {
+                int id = pack.getPlayersId();
+                
+                if (id != clientId) {
+                    if (!playerNumbers.containsKey(id)) {
                         // Tutaj jakiś błąd chyba...
                         System.out.print("Klient poznał nowego gracza - name = " + pack.getPlayersName()
-                                + ", ID = " + pack.getPlayersId() + "\n");
+                                + ", ID = " + id + "\n");
                         
-                        playerNumbers.put(pack.getPlayersId(), ++playersConnected);
-                        playerNames.put(pack.getPlayersId(), pack.getPlayersName());
-                        playerCharacters.put(pack.getPlayersId(), pack.getCharacter());
-                        keyboardControlRemote.put(pack.getPlayersId(), new KeyboardControlRemote(this));
-                        playerReady.put(pack.getPlayersId(),false);
+                        playerNumbers.put(id, ++playersConnected);
+                        playerNames.put(id, pack.getPlayersName());
+                        playerCharacters.put(id, pack.getCharacter());
+                        keyboardControlRemote.put(id, new KeyboardControlRemote(this));
+                        playerReady.put(id,false);
                         
                         // Ustawianie postaci.
                         chosenCharacter.value = pack.getCharacter();
-                        chooseCharacter(false,pack.getPlayersId());
+                        chooseCharacter(false,id);
                         
                         for (Integer i : keyboardControlRemote.keySet())
                             System.out.println("KLIENT - new remote keyboard - " + i);
                     }
                     
-                    if (pack.isPlayerReady() == true)
-                        playerReady.put(pack.getPlayersId(), true);
+                    if ((pack.isPlayerReady() == true) && (playerReady.get(id) == false)) {
+                        characterBlocked.get(pack.getCharacter()).value = 1;
+                        playerReady.put(id, true);
+                    }
                     else
-                        playerCharacters.put(pack.getPlayersId(), pack.getCharacter());
+                        playerCharacters.put(id, pack.getCharacter());
                     
                     // Ustawianie odpowiednich wejść z klawiatury
                     try
-                    {((KeyboardControlRemote)getKeyboard(pack.getPlayersId())).feedInput(pack.getPressedKey());}
+                    {((KeyboardControlRemote)getKeyboard(id)).feedInput(pack.getPressedKey());}
                     catch (Exception e) {System.out.println("WRYYYYYYYYYY");}
                 }
             }

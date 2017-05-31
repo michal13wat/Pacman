@@ -36,7 +36,7 @@ public class ServerGame extends Game {
         max_render_skip = 10;
         
         wrapperInit();
-        startingLives.value = 1000;
+        startingLives.value = 1;
         
         objectList = new ArrayList<>();
         menuControl = new MenuControl(this);
@@ -58,19 +58,7 @@ public class ServerGame extends Game {
         //while (listening) {}
         
         //gotoMenu("test");
-        LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
-        l.setSource("src/resources/stages/pac_layout_3.txt");
-        
-        gameStep();
-        
-        PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
-        playerDisplay.loadFont("pac_font_sprites",8,8);
-        playerDisplay.setPosition(l.getWidth()+16,64);
-        playerDisplay.setAllConnected();
-        
-        PlayerTagObject tagDisplay = (PlayerTagObject)createObject(PlayerTagObject.class);
-        tagDisplay.loadFont("pac_font_sprites",8,8);
-        tagDisplay.setPosition(l.getWidth()+16,64);
+        endGame(false);
         
         //createObject(TestObject.class);
         /*TextObject o = (TextObject)createObject(TextObject.class);
@@ -96,6 +84,33 @@ public class ServerGame extends Game {
         ghostPlayer = new IntWrapper[4];
         for (int i = 0; i < 4; i++)
             ghostPlayer[i] = new IntWrapper(-1);
+    }
+    
+    @Override
+    public void endGame(boolean victory) {
+        
+        System.out.println("NEW STAGE");
+        for (GameObject o : objectList) o.destroy();
+        objectList.clear();
+        
+        LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
+        
+        double stage = Math.random();
+        System.out.println(stage);
+        if (stage < 1/3.0) l.setSource("src/resources/stages/pac_layout_0.txt");
+        else if (stage < 2/3.0) l.setSource("src/resources/stages/pac_layout_2.txt");
+        else l.setSource("src/resources/stages/pac_layout_3.txt");
+        
+        gameStep();
+        
+        PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
+        playerDisplay.loadFont("pac_font_sprites",8,8);
+        playerDisplay.setPosition(l.getWidth()+16,80);
+        playerDisplay.setAllConnected();
+        
+        PlayerTagObject tagDisplay = (PlayerTagObject)createObject(PlayerTagObject.class);
+        tagDisplay.loadFont("pac_font_sprites",8,8);
+        tagDisplay.setPosition(l.getWidth()+16,64);
     }
     
     @Override

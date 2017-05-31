@@ -7,6 +7,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.Serializable;
 import java.util.ArrayList;
+import pacman.ClientGame;
+import pacman.ServerGame;
 
 public class PacmanObject extends CharacterObject implements Serializable {
     @Override
@@ -134,7 +136,6 @@ public class PacmanObject extends CharacterObject implements Serializable {
             destroy();
             return;
         }
-        
         
         flickerCounter = 120;
         super.resetPosition();
