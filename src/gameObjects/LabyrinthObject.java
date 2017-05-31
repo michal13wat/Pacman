@@ -144,12 +144,12 @@ public class LabyrinthObject extends GameObject implements Serializable {
     private void labyrinthInit() {
         // Początkowe załadowanie labiryntu.
         try {
-            FileInputStream fi = game.loadLabyrinth(sourceFile);
+            InputStream fi = game.loadLabyrinth(sourceFile,fromJar);
             if (fi == null) return;
             sizeInput(fi);
             fi.close();
             
-            fi = game.loadLabyrinth(sourceFile);
+            fi = game.loadLabyrinth(sourceFile,fromJar);
             if (fi == null) return;
             layoutInput(fi);
             fi.close();
@@ -356,10 +356,13 @@ public class LabyrinthObject extends GameObject implements Serializable {
     String tileset;
     
     boolean finished = false;
+    boolean fromJar = false;
     
-    public void setSource(String f) {
-        sourceFile = f;
-        counter = 0;
+    public void setSource(String f, boolean fromJar) {
+        System.out.println("LABIRYNTH loading as " + f);
+        this.sourceFile = f;
+        this.fromJar = fromJar;
+        this.counter = 0;
     }
     
     public int getWidth() {

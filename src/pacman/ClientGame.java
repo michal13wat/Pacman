@@ -61,7 +61,7 @@ public class ClientGame extends Game {
         preloadSprites();
         
         // Wątek klienta.
-        String addressIP = Game.ipString.value;
+        String addressIP = Game.ipString.value; //processAddressIP(Game.ipString.value);
         String port = Game.portString.value;
         int playerID = Game.playerNumber.value;
         client = new Client(addressIP, new Integer(port), playerID);
@@ -296,4 +296,31 @@ public class ClientGame extends Game {
     
     public void setReady(boolean x) {ready = x;}
     public boolean isReady() {return ready;}
+    
+    private String processAddressIP(String addressIP){
+        System.out.println("INITIAL ADDRESS " + addressIP);
+        if (addressIP == "localhost"){
+            return addressIP;
+        }
+        int length = addressIP.length();
+        String IP = new String();
+        if (length < 8 || length > 11){
+            IP = addressIP;
+        }else {
+            if (addressIP.matches("\\d+")){
+                //System.out.println("To jest adres IP: " + addressIP);
+                IP = addressIP.substring(0, 3);
+                IP += ".";
+                IP += addressIP.substring(3, 6);
+                IP += ".";
+                IP += addressIP.substring(6, 7);
+                IP += ".";
+                IP += addressIP.substring(7);
+                //System.out.println("Po przetworzeniu:" + IP);
+            }
+
+        }
+        System.out.println("PROCESSED ADDRESS " + IP);
+        return IP;
+    }
 }

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 
 import menuAndInterface.*;
 import java.util.ArrayList;
@@ -97,9 +98,23 @@ public class ServerGame extends Game {
         
         double stage = Math.random();
         System.out.println(stage);
-        if (stage < 1/3.0) l.setSource("src/resources/stages/pac_layout_0.txt");
-        else if (stage < 2/3.0) l.setSource("src/resources/stages/pac_layout_2.txt");
-        else l.setSource("src/resources/stages/pac_layout_3.txt");
+        
+        if (Game.isJar) {
+            if (stage < 1/3.0) l.setSource("/resources/stages/pac_layout_0.txt",true);
+            else if (stage < 2/3.0) l.setSource("/resources/stages/pac_layout_2.txt",true);
+            else l.setSource("/resources/stages/pac_layout_3.txt",true);
+        }
+        else {
+            URL file1, file2, file3;
+            file1 = getClass().getResource("/resources/stages/pac_layout_0.txt");
+            file2 = getClass().getResource("/resources/stages/pac_layout_2.txt");
+            file3 = getClass().getResource("/resources/stages/pac_layout_3.txt");
+            System.out.println(file1.getPath());
+            if (stage < 1/3.0) l.setSource(file1.getPath(),false);
+            else if (stage < 2/3.0) l.setSource(file2.getPath(),false);
+            else l.setSource(file3.getPath(),false);
+        }
+        
         
         gameStep();
         
