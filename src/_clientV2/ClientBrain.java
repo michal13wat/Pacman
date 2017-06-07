@@ -13,7 +13,7 @@ public class ClientBrain extends Thread {
     public ClientSender clientSender;
     public ClientReceiver receiver;
     public PackToSendToServer packOut
-            = new PackToSendToServer("name", 0, "direction", 0);  // jakiś tam testowy pakiet na początek
+            = new PackToSendToServer("name", 0, "direction", 0, false);  // jakiś tam testowy pakiet na początek
     public static clientAndServer.PackReceivedFromServer<gameObjects.GameObject> recPac;
     public static volatile ArrayList<String> connectedClientsBuffer = new ArrayList<>();
     public static volatile int notConnectedClientsAmountBuffer = -1;

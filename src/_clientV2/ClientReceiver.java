@@ -29,11 +29,11 @@ public class ClientReceiver extends Thread {
                 receivedPackagesCounter++;
                 System.out.print(_clientV2.ClientBrain.recPac.getAdditionalInfo() + "\t\t Odebrano pakietów: "
                         + receivedPackagesCounter + "\t\tConnected Clients: ");
-                for (int i = 0; i < _clientV2.ClientBrain.recPac.getConnectedClients().size(); i++){
+                /*for (int i = 0; i < _clientV2.ClientBrain.recPac.getConnectedClients().size(); i++){
                     System.out.print(_clientV2.ClientBrain.recPac.getConnectedClients().get(i));
                 }
                 System.out.print(" Not connected clientes: "
-                        + _clientV2.ClientBrain.recPac.getNotConnectedClients() + "\n");
+                        + _clientV2.ClientBrain.recPac.getNotConnectedClients() + "\n");*/
 			}
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host " + hostName + "at BrcCl");

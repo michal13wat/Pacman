@@ -9,11 +9,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import pacman.Game;
-import gameObjects.GameObject;
 import java.io.Serializable;
 import java.net.URL;
 import pacman.Sprite;
+
+import gameObjects.GameObject;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import pacman.*;
 
 // Od teraz, w tej klasie jest wszystko związane z ustawieniami Menu.
 
@@ -33,6 +40,11 @@ public class MenuControl {
     {return game.createObject(ourClass);}
     
     public void gotoMenu(String which){
+        for (GameObject o : game.getAllObjects(MenuObject.class))
+        {o.destroy();}
+        for (GameObject o : game.getAllObjects(TextObject.class))
+        {o.destroy();}
+        
         switch (which){
             case "start":{
                 startMenu();
@@ -56,6 +68,10 @@ public class MenuControl {
             break;
             case  "join_game":{
                 joinGameMenu();
+            }
+            break;
+            case  "game_lobby":{
+                gameLobbyMenu();
             }
             break;
 //            case "display_connected_players": {
@@ -109,42 +125,87 @@ public class MenuControl {
         sprites.add(new Sprite("pac_font_sprites",25,3,8,8));*/
         stageSelectMenu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
         stageSelectMenu.addSpinnerOption("Lives ",null,game.startingLives,1,5);
-        stageSelectMenu.addSpinnerOption("Ghosts ", null, game.playersAmount, 1, 4);
+        stageSelectMenu.addSpinnerOption("Ghosts ", null, game.ghostsAmount, 1, 4);
 
         // Ładowanie wszystkich plików .txt z "/resources/stages" jako poziomy.
         try
         {
             URL dirURL = getClass().getResource("/resources/stages");
-            File folder = new File(dirURL.toURI());
-            File[] allLabyrinths = folder.listFiles();
             
-            InputStream in;
-            String stageName;
-            int c;
-
-            for (File f : allLabyrinths) {
-                try {
-                    // Nazwa poziomu w pierwszej linii.
-                    in = new FileInputStream(f.getPath());
-                    
-                    stageName = "";
-                    while ((c = in.read()) != '\n') 
-                        stageName += Character.toString((char)c);
-                } catch (FileNotFoundException e){
-                    System.err.println("Error: File not found");
-                    stageName = "ERROR";
-                } catch (IOException e){
-                    System.err.println("Exception: IOException");
-                    stageName = "ERROR";
-                }
+            File folder = null;
+            File[] allLabyrinths = null;
+            
+            if (dirURL.getProtocol().equals("jar")) {
                 
-                // Nowy Callable.
-                final File finalFile = f;
-                stageSelectMenu.addMenuOption(stageName,() -> {
-                            LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
-                            l.setSource(f.getPath());
-                            return 1;
-                        });
+                String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+                JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+                Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+
+                InputStream in;
+                String stageName;
+                int c;
+                
+                while(entries.hasMoreElements()) {
+                    String name = entries.nextElement().getName();
+                    
+                    if (name.startsWith("resources/stages/pac")) { //filter according to the path
+                        
+                                                try {
+                              // Nazwa poziomu w pierwszej linii.
+                              in = (getClass().getResourceAsStream("/"+name));
+
+                              stageName = "";
+                              while ((c = in.read()) != '\n') 
+                                  stageName += Character.toString((char)c);
+                          } catch (FileNotFoundException e){
+                              System.err.println("Error: File not found");
+                              stageName = "ERROR";
+                          } catch (IOException e){
+                              System.err.println("Exception: IOException");
+                              stageName = "ERROR";
+                          } catch (Exception e) {stageName = e.getMessage();}
+
+                          // Nowy Callable.
+                          stageSelectMenu.addMenuOption(stageName,() -> {
+                                      LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
+                                      l.setSource("/"+name,true);
+                                      return 1;
+                                  });
+                    }
+                }
+            }
+            else {
+                folder = new File(dirURL.toURI());
+                allLabyrinths = folder.listFiles();
+
+                InputStream in;
+                String stageName;
+                int c;
+
+                for (File f : allLabyrinths) {
+                    try {
+                        // Nazwa poziomu w pierwszej linii.
+                        in = new FileInputStream(f.getPath());
+
+                        stageName = "";
+                        while ((c = in.read()) != '\n') 
+                            stageName += Character.toString((char)c);
+                    } catch (FileNotFoundException e){
+                        System.err.println("Error: File not found");
+                        stageName = "ERROR";
+                    } catch (IOException e){
+                        System.err.println("Exception: IOException");
+                        stageName = "ERROR";
+                    }
+
+                    // Nowy Callable.
+                    final File finalFile = f;
+                    stageSelectMenu.addMenuOption(stageName,() -> {
+                                LabyrinthObject l = (LabyrinthObject)createObject(LabyrinthObject.class);
+                                l.setSource(f.getPath(),false);
+                                return 1;
+                            });
+                }
             }
         }
         catch (Exception e)
@@ -156,7 +217,7 @@ public class MenuControl {
             });
 
         stageSelectMenu.addButtonPressOption("exitOnQ",()-> {
-                    game.close();
+                    gotoMenu("start");
                     return 1;
                 }, "q" );
     }
@@ -179,7 +240,7 @@ public class MenuControl {
                 return 1;
             });
         menu.addButtonPressOption("exitOnQ",()-> {
-                    game.close();
+                    gotoMenu("start");
                     return 1;
                 }, "q" );
     }
@@ -189,24 +250,20 @@ public class MenuControl {
         menu.setFont("pac_font_sprites",8,8);
         menu.setTitle("CREATE GAME");
         
-        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
-        
         /* Prócz uruchomienia servera trzeba tutaj uruchomić jednego klienta lokalnie */
         menu.addMenuOption("Start", ()-> {
             game.getExecutor().submit(game.callableStartSever);
-            //if (true) return  1;
-            /*  TODO - wywalić tego if-a powyżej - jest on do debugowania, żeby gra się nie włączała*/
-
-            Game.ipString.value = "localhost";
+            Game.ipString.value = "127.0.0.1";
             //portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
             Game.playerNumber.value = 0;
-            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
+            //game.getExecutor().submit(game.callableStartClient);
+            //game.halt();
             
-            gotoMenu("start");
+            game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
             return 1;
         });
-
-        menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 2, 4);
+        
+        menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 1, 4);
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addNumberInputOption("Port: ",null,Game.portString,null,5);
 
@@ -215,7 +272,7 @@ public class MenuControl {
             return 1;
         });
         menu.addButtonPressOption("exitOnQ",()-> {
-            game.close();
+            gotoMenu("server_setup");
             return 1;
         }, "q" );
     }
@@ -226,27 +283,51 @@ public class MenuControl {
         menu.setTitle("JOIN GAME");
 
         //menu.addNumberInputOption("IP: ",null,ipString,"xxx.xxx.x.xx",9);
-        menu.addImageSpinnerOption("Character ", null, game.chosenCharacter, 0, 4, sprites);
         menu.addMenuOption("Join",() -> {
             // TODO - UWAGA - na koniec wywalić poniższą linijkę, bo docelowo ma być bez zmian!!!
             // TODO - takie jak zostało odczytane z MENU !!!
-
-            //System.out.println("Klient podłącza się do adresu: " + Game.ipString.value);
             //Game.ipString.value = "localhost";
 //            portString.value - takie jak zostało odczytane z MENU, czyli bez zmian
 //            playerNumber.value - takie jak zostało odczytane z MENU, czyli bez zmian
+            //game.getExecutor().submit(game.callableStartClient);
+            //game.halt();
+            
             game.startClient(Game.ipString.value, Game.portString.value, Game.playerNumber.value);
-
-            while (true){} // TODO - wywalić to (zablokuj grę)
-            //gotoMenu("start");
-            //return 1;
+            
+            return 1;
         });
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addSpinnerOption("Player ID: ", null, Game.playerNumber, 1, 3);
-        menu.addNumberInputOption("IP: ",null,Game.ipString,"xxx.xxx.x.xxx",10);
-        menu.addNumberInputOption("Port: ",null,Game.portString,null,5);
+        menu.addStringInputOption("IP: ",null,Game.ipString,null,14/*,"xxx.xxx.x.xx",9*/);
+        menu.addNumberInputOption("Port: ",null,Game.portString,null,4);
         menu.addMenuOption("BACK", () -> {
             gotoMenu("server_setup");
+            return 1;
+        });
+        menu.addButtonPressOption("exitOnQ",()-> {
+            gotoMenu("server_setup");
+            return 1;
+        }, "q" );
+    }
+    
+    private void gameLobbyMenu() {
+        
+        MenuObject menu = (MenuObject)createObject(MenuObject.class);
+        menu.setFont("pac_font_sprites",8,8);
+        menu.setTitle("GAME LOBBY");
+
+        menu.addImageSpinnerOption("Character ", null, game.characterBlocked,
+                                        game.chosenCharacter, 0, 4, sprites);
+        menu.addMenuOption("READY",() -> {
+            
+            ClientGame clientGame = (ClientGame)game;
+            clientGame.setReady(true);
+            gotoMenu("game_lobby");
+            
+            return 1;
+        });
+        menu.addMenuOption("Exit Server", () -> {
+            game.close();
             return 1;
         });
         menu.addButtonPressOption("exitOnQ",()-> {

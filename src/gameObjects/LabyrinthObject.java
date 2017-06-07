@@ -18,6 +18,8 @@ import java.util.ArrayList;
 
 import java.io.*;
 import javax.imageio.ImageIO;
+import pacman.ClientGame;
+import pacman.ServerGame;
 
 public class LabyrinthObject extends GameObject implements Serializable {
     @Override
@@ -65,18 +67,22 @@ public class LabyrinthObject extends GameObject implements Serializable {
         if (scoreDisplay != null) scoreDisplay.setText(String.format("%03d",game.getScore()));
         if (livesDisplay != null) {
             String s = "";
-            for (int i = 0; i < game.getLives(); i ++) s += "`";
+            for (int i = 0; i < game.getLives(); i ++) s += (char)201;
             livesDisplay.setText(s);
         }
         if (endDisplay != null) {
             endDisplay.setText("");
             if (counter%10 >= 5) {
                 if (game.getAllObjects(DotObject.class).isEmpty()){
-                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU WIN !!!");
+                    if ((game instanceof ClientGame) || (game instanceof ServerGame))
+                    {endDisplay.setText("PACMAN WINS!!!");endDisplay.setPosition(endDisplay.getX(),48);}
+                    else if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU WIN !!!");
                     else endDisplay.setText("YOU LOSE !!!");
                 }
                 if (game.getLives() == 0) { ////////////////////// TUTAJ SIĘ ZAWIESZA(Ł) SERWER!!!!!!! ///////////////////////////////////////
-                    if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU LOSE !!!");
+                    if ((game instanceof ClientGame) || (game instanceof ServerGame))
+                    {endDisplay.setText("GHOSTS WIN!!!");endDisplay.setPosition(endDisplay.getX(),48);}
+                    else if (game.getPacmanPlayer() == 0)endDisplay.setText("YOU LOSE !!!");
                     else endDisplay.setText("YOU WIN !!!");
                 }
             }
@@ -112,7 +118,7 @@ public class LabyrinthObject extends GameObject implements Serializable {
         livesDisplay.destroy();
         endDisplay.destroy();*/
         
-        game.gotoMenu("start");
+        game.gotoMenu("stage_select");
     }
     
     /*@Override
@@ -138,12 +144,12 @@ public class LabyrinthObject extends GameObject implements Serializable {
     private void labyrinthInit() {
         // Początkowe załadowanie labiryntu.
         try {
-            FileInputStream fi = game.loadLabyrinth(sourceFile);
+            InputStream fi = game.loadLabyrinth(sourceFile,fromJar);
             if (fi == null) return;
             sizeInput(fi);
             fi.close();
             
-            fi = game.loadLabyrinth(sourceFile);
+            fi = game.loadLabyrinth(sourceFile,fromJar);
             if (fi == null) return;
             layoutInput(fi);
             fi.close();
@@ -166,7 +172,9 @@ public class LabyrinthObject extends GameObject implements Serializable {
         // Inicjalizacja poziomu.
         game.setScore(0);
         game.setLives(game.getStartingLives());
-        game.chooseCharacter(true,0);
+        if ((game.chosenCharacter.value != -1)
+                && !((game instanceof ClientGame) || (game instanceof ServerGame)))
+            game.chooseCharacter(true,0);
 
         tileset = "pac_labyrinth_tileset";
     }
@@ -348,10 +356,13 @@ public class LabyrinthObject extends GameObject implements Serializable {
     String tileset;
     
     boolean finished = false;
+    boolean fromJar = false;
     
-    public void setSource(String f) {
-        sourceFile = f;
-        counter = 0;
+    public void setSource(String f, boolean fromJar) {
+        System.out.println("LABIRYNTH loading as " + f);
+        this.sourceFile = f;
+        this.fromJar = fromJar;
+        this.counter = 0;
     }
     
     public int getWidth() {
@@ -361,5 +372,4 @@ public class LabyrinthObject extends GameObject implements Serializable {
     public int getHeight() {
         return (height+1)*sizeMod;
     }
-    
 }

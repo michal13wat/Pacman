@@ -2,7 +2,10 @@ package clientAndServer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
+import pacman.IntWrapper;
+import pacman.StringWrapper;
 
 /**
  * Created by User on 2017-04-17.
@@ -19,6 +22,14 @@ public class PackReceivedFromServer<T> implements Serializable {
     private int notConnectedClients = 0;
     private Random randomizer = null;
 
+    // Wartości z wrapperów.
+    public int gameScore;
+    public int gameLives;
+    public int maxPlayers;
+    
+    // Czy aby na pewno???
+    private ArrayList<PackToSendToServer> clientFeedback = new ArrayList<>();
+    
     public PackReceivedFromServer(){
     }
     public PackReceivedFromServer(ArrayList<T> objectsList, String additionalInfo,
@@ -33,10 +44,11 @@ public class PackReceivedFromServer<T> implements Serializable {
         objectsList.clear();
         deletedList.clear();
         connectedClients.clear();
+        clientFeedback.clear();
         randomizer = null;
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
-
+    
     public void addObject(T obj){
         objectsList.add(obj);
     }
@@ -46,6 +58,14 @@ public class PackReceivedFromServer<T> implements Serializable {
 
     public void addDeletedList(ArrayList<Integer> list) {
         deletedList.addAll(list);
+    }
+    
+    public void addFeedbacks(ArrayList<PackToSendToServer> list) {
+        clientFeedback.addAll(list);
+    }
+    
+    public void addFeedback(PackToSendToServer pack) {
+        clientFeedback.add(pack);
     }
     
     public String getAdditionalInfo() {
@@ -60,10 +80,14 @@ public class PackReceivedFromServer<T> implements Serializable {
         return deletedList;
     }
     
+    public ArrayList<PackToSendToServer> getClientFeedback() {
+        return clientFeedback;
+    }
+    
     public Random getRandomizer() {
         return randomizer;
     }
-
+    
     public void addConnectedClient(String name){
         this.connectedClients.add(name);
     }

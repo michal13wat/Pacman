@@ -14,7 +14,7 @@ import java.util.ListIterator;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import menuAndInterface.MenuControl;
+import menuAndInterface.*;
 import static pacman.Game.ipString;
 //import static pacman.Game.packReceivedFromServer;
 import static pacman.Game.playerNumber;
@@ -22,10 +22,11 @@ import static pacman.Game.portString;
 
 public class ClientGame extends Game {
     
-    public ClientGame(JFrame gameWindow, JPanel gameRenderer, String playerName) {
+    public ClientGame(JFrame gameWindow, JPanel gameRenderer, StringWrapper playerName, IntWrapper chosenCharacter) {
         this.gameWindow = gameWindow;
         this.gameRenderer = gameRenderer;
-        this.playerName = new StringWrapper(playerName);
+        this.playerName = playerName;
+        this.chosenCharacter = chosenCharacter;
         //this.ipString = ipString;
         //this.portString = portString;
         //this.playerNumber = playerNumber;
@@ -41,14 +42,20 @@ public class ClientGame extends Game {
         
         // Parametry gry.
         running = true;
+        ready = false;
         
         wrapperInit();
         
         framesPerSecond = 60;
         framesSkip = 1000/framesPerSecond;
         max_render_skip = 10;
-        
         objectList = new ArrayList();
+        
+        playerNumbers = new HashMap<>();
+        playerNames = new HashMap<>();
+        playerCharacters = new HashMap<>();
+        keyboardControlRemote = new HashMap<>();
+        playerReady = new HashMap<>();
         
         // Klawiatura.
         keyboardControl.keyboardInit();
@@ -57,7 +64,7 @@ public class ClientGame extends Game {
         preloadSprites();
         
         // Wątek klienta.
-        String addressIP = Game.ipString.value;
+        String addressIP = Game.ipString.value; //processAddressIP(Game.ipString.value);
         String port = Game.portString.value;
         int playerID = Game.playerNumber.value;
         
@@ -66,22 +73,33 @@ public class ClientGame extends Game {
         client = new ClientBrain(addressIP, portInteger, portInteger+1, playerName.value, playerID);
         client.start();
         
+        gotoMenu("game_lobby");
+        
+        PlayerDisplayObject playerDisplay = (PlayerDisplayObject)createObject(PlayerDisplayObject.class);
+        playerDisplay.loadFont("pac_font_sprites",8,8);
+        playerDisplay.setPosition(0,48);
+        
         globalCounter = 0;
         System.out.println("Inicjalizacja ClientGame zakończona.");
         gameLoop();
     }
     
+    @Override
     protected void wrapperInit() {
-
+        
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
+        ghostsAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
-        isPacmanPlayed = new IntWrapper(0);
         
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
         for (int i = 0; i < 4; i++)
             ghostPlayer[i] = new IntWrapper(-1);
+        
+        characterBlocked = new ArrayList<>();
+        for (int i = 0; i < 5; i++)
+            characterBlocked.add(new IntWrapper(0));
     }
     
     @Override
@@ -98,7 +116,7 @@ public class ClientGame extends Game {
             while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip)) {
                 sendInput();
                 receiveObjects();
-                gameStep();
+                if (!ready) gameStep();
                 
                 nextStep += framesSkip;
                 globalCounter ++;
@@ -112,7 +130,7 @@ public class ClientGame extends Game {
                     }
                 }
             
-                if (keyboardCheck("escape")) running = false;
+                if ((keyboardCheck("escape")) || (keyboardCheck("q"))) running = false;
             }
         }
         
@@ -135,9 +153,9 @@ public class ClientGame extends Game {
         
         name = playerName.value;
         // TODO - zrobić jak będzie działał wybór postaci
-        character = 0;
+        character = chosenCharacter.value;
         pressedKey = checkPressedKeys();
-        //System.out.println("KLIENT " + name + " " + pressedKey);
+        System.out.println("KLIENT " + name + (ready ? ("[OK] ") : "") + " " + pressedKey);
         
         // TODO - wywalić to opóźnienie
         
@@ -149,7 +167,7 @@ public class ClientGame extends Game {
             e.printStackTrace();
         }*/
         
-        client.packOut = new PackToSendToServer(name, character, pressedKey, clientId);
+        client.packOut = new PackToSendToServer(name, character, pressedKey, clientId, ready);
     }
     
     protected void receiveObjects()
@@ -170,6 +188,10 @@ public class ClientGame extends Game {
             }
             System.out.print("KLIENT - Waiting for: " + packReceivedFromServer.getNotConnectedClients() +
                     " players\n");
+            
+            gameScore = packReceivedFromServer.gameScore;
+            gameLives = packReceivedFromServer.gameLives;
+            playersAmount.value = packReceivedFromServer.maxPlayers;
             
             // Przybieranie nowej listy jako własna.
             overlapIds(packReceivedFromServer.getObjectsList());
@@ -193,6 +215,44 @@ public class ClientGame extends Game {
                 // Powiadamianie obiektów o labiryncie.
                 for (GameObject o : objectList) {
                     o.setCollisionMap(labyrinth);
+                }
+            }
+            
+            for (PackToSendToServer pack : packReceivedFromServer.getClientFeedback()){
+                
+                int id = pack.getPlayersId();
+                
+                if (id != clientId) {
+                    if (!playerNumbers.containsKey(id)) {
+                        // Tutaj jakiś błąd chyba...
+                        System.out.print("Klient poznał nowego gracza - name = " + pack.getPlayersName()
+                                + ", ID = " + id + "\n");
+                        
+                        playerNumbers.put(id, ++playersConnected);
+                        playerNames.put(id, pack.getPlayersName());
+                        playerCharacters.put(id, pack.getCharacter());
+                        keyboardControlRemote.put(id, new KeyboardControlRemote(this));
+                        playerReady.put(id,false);
+                        
+                        // Ustawianie postaci.
+                        chosenCharacter.value = pack.getCharacter();
+                        chooseCharacter(false,id);
+                        
+                        for (Integer i : keyboardControlRemote.keySet())
+                            System.out.println("KLIENT - new remote keyboard - " + i);
+                    }
+                    
+                    if ((pack.isPlayerReady() == true) && (playerReady.get(id) == false)) {
+                        characterBlocked.get(pack.getCharacter()).value = 1;
+                        playerReady.put(id, true);
+                    }
+                    else
+                        playerCharacters.put(id, pack.getCharacter());
+                    
+                    // Ustawianie odpowiednich wejść z klawiatury
+                    try
+                    {((KeyboardControlRemote)getKeyboard(id)).feedInput(pack.getPressedKey());}
+                    catch (Exception e) {System.out.println("WRYYYYYYYYYY");}
                 }
             }
         }
@@ -236,5 +296,38 @@ public class ClientGame extends Game {
     static volatile PackReceivedFromServer<GameObject> packReceivedFromServer;
     
     ClientBrain client;
+    int playersConnected = 0;
     int clientId;
+    
+    boolean ready;
+    
+    public void setReady(boolean x) {ready = x;}
+    public boolean isReady() {return ready;}
+    
+    private String processAddressIP(String addressIP){
+        System.out.println("INITIAL ADDRESS " + addressIP);
+        if (addressIP == "localhost"){
+            return addressIP;
+        }
+        int length = addressIP.length();
+        String IP = new String();
+        if (length < 8 || length > 11){
+            IP = addressIP;
+        }else {
+            if (addressIP.matches("\\d+")){
+                //System.out.println("To jest adres IP: " + addressIP);
+                IP = addressIP.substring(0, 3);
+                IP += ".";
+                IP += addressIP.substring(3, 6);
+                IP += ".";
+                IP += addressIP.substring(6, 7);
+                IP += ".";
+                IP += addressIP.substring(7);
+                //System.out.println("Po przetworzeniu:" + IP);
+            }
+
+        }
+        System.out.println("PROCESSED ADDRESS " + IP);
+        return IP;
+    }
 }

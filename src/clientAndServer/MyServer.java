@@ -22,7 +22,7 @@ public class MyServer extends Thread {
     
     int port;
     boolean running = true;
-
+    
     private static int clientAmount;
 
     ArrayList<ServerThread> serverThreads = new ArrayList<>();
@@ -55,9 +55,12 @@ public class MyServer extends Thread {
             serverSocket = ServerSocketChannel.open();
             serverSocket.configureBlocking(true);
             serverSocket.socket().bind(new InetSocketAddress(port));
+            System.out.print("Tworzenie serwera...\n");
         }
         catch (IOException e)
         {System.out.print("SERWER - bląd w tworzeniu głównego wątku serwerowego!\n");}
+        
+        setName("SERVER");
         
         start();
     }
@@ -87,6 +90,8 @@ public class MyServer extends Thread {
             }
         }
         
+        killThreads();
+        System.out.println("Zamykamy serwer!");
     }
     
     public static int getClientAmount() {
@@ -97,10 +102,19 @@ public class MyServer extends Thread {
         for (ServerThread thread : serverThreads) {
             thread.stopThread();
         }
+        
+        executor.shutdownNow();
     }
     
     public void close() {
         running = false;
         killThreads();
+        try
+        {serverSocket.close();}
+        catch (Exception e) {}
+    }
+    
+    public int getMaxPlayers() {
+        return clientAmount;
     }
 }

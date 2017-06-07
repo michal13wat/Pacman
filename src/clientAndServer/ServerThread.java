@@ -30,6 +30,8 @@ public class ServerThread extends Thread {
     
     SocketChannel playerWhiteSocket;
     static boolean[] verifySendObject = null;
+    
+    boolean running = true;
 
     public ServerThread() {
         threadNum = threadCnt;
@@ -38,6 +40,8 @@ public class ServerThread extends Thread {
         for (int i = 0; i < verifySendObject.length; i++){
             verifySendObject[i] = false;
         }
+        
+        setName("SERVER THREAD " + threadNum);
     }
 
     public ServerThread(SocketChannel socket, int port) {
@@ -69,8 +73,8 @@ public class ServerThread extends Thread {
             oos = new ObjectOutputStream(playerWhiteSocket.socket().getOutputStream());
             bos = new BufferedOutputStream(playerWhiteSocket.socket().getOutputStream());
             ois = new ObjectInputStream(playerWhiteSocket.socket().getInputStream());
-
-            while (true){
+            
+            while (running){
                 if (isSentByXThread(threadNum)){
                     System.out.print("Rozopoczynam wysłanie obiektu \n");
                     sendObject(playerWhiteSocket, objToSend, bytesToSend);
@@ -87,9 +91,12 @@ public class ServerThread extends Thread {
             System.out.print("Złapano wyjątek w wysyłającym wątku serwera!!!");
             ex.printStackTrace();
         }
+        
+        System.out.println("Zamykamy wątek serwerowy nr. " + threadNum + "!");
     }
     
     public void stopThread() {
+        running = false;
         try {
             playerWhiteSocket.close();
             oos.close();

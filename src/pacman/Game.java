@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import gameObjects.*;
+import java.net.URL;
 import javax.imageio.ImageIO;
 import menuAndInterface.*;
 
@@ -50,7 +51,7 @@ public class Game extends Thread
         framesSkip = 1000/framesPerSecond;
         max_render_skip = 10;
         
-        ipString = new StringWrapper("12700001");
+        ipString = new StringWrapper("127.0.0.1");
         portString = new StringWrapper("7171");
         
         wrapperInit();
@@ -72,7 +73,10 @@ public class Game extends Thread
     
     protected void windowInit(boolean fullscreen) {
         // Nowe JFrame z pojedynczym JPanel'em.
-        gameWindow = new JFrame("Testing");
+        gameWindow = new JFrame("PACMAN");
+        
+        URL dirURL = getClass().getResource("/resources/stages");
+        isJar = (dirURL.getProtocol().equals("jar"));
         
         gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -97,8 +101,8 @@ public class Game extends Thread
 
         startingLives = new IntWrapper(3);
         playersAmount = new IntWrapper(4);
+        ghostsAmount = new IntWrapper(4);
         playerNumber = new IntWrapper(1);
-        isPacmanPlayed = new IntWrapper(0);
 
         pacmanPlayer = new IntWrapper(-1);
         ghostPlayer = new IntWrapper[4];
@@ -144,16 +148,17 @@ public class Game extends Thread
                 
                 nextStep += framesSkip;
                 globalCounter ++;
-                loops ++;    
+                loops ++;
                 
                 if ((System.currentTimeMillis() <= nextStep) || (loops >= max_render_skip)) {
-                    if (running)  gameDraw();
+                    if (running) gameDraw();
                 }
                 
                 if (keyboardCheck("escape")) running = false;
             }
         }
         
+        System.out.println("Zamykamy grę!");
         gameWindow.setVisible(false);
         gameWindow.dispose();
     }
@@ -318,12 +323,20 @@ public class Game extends Thread
     // Konkretne metody do różnych celów.
     //////////////////////////////////////////////////////////////////////
     
-    public FileInputStream loadLabyrinth(String fileName) {
+    public InputStream loadLabyrinth(String fileName, boolean fromJar) {
         // Jednorazowe ładowanie labiryntu.
-        FileInputStream fi = null;
+        InputStream fi = null;
         
-        try {fi = new FileInputStream(fileName);}
-        catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        System.out.println("Labirynt: "+fileName);
+        
+        if (fromJar == true) {
+            try {fi = (getClass().getResourceAsStream(fileName));}
+            catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        }
+        else {
+            try {fi = new FileInputStream(fileName);}
+            catch (Exception e) {System.out.println("Błąd w ładowaniu labiryntu.");}
+        }
         
         return fi;
     }
@@ -343,6 +356,7 @@ public class Game extends Thread
     public void chooseCharacter(boolean resetPreviousChoices, int forPlayer) {
         // Przetwarza wartości z chosenCharacter na wybór konkretnej postaci
         // dla konkretnego gracza. Odpala odpowiednie metody u postaci, aby zatwierdzić.
+        System.out.println("Przypisywanie postaci rozpoczęte.");
         
         if (resetPreviousChoices) {
             pacmanPlayer.value = -1;
@@ -352,10 +366,12 @@ public class Game extends Thread
         
         if (chosenCharacter.value == 0) {
             // Wybraliśmy Pacmana.
+            System.out.println("Pacman przypisany dla gracza " + forPlayer);
             pacmanPlayer.value = forPlayer;
         }
         else if (chosenCharacter.value > 0) {
             // Wybraliśmy któregoś z duchów.
+            System.out.println("Duszek przypisany dla gracza " + forPlayer);
             ghostPlayer[chosenCharacter.value-1].value = forPlayer;
         }
         
@@ -363,6 +379,8 @@ public class Game extends Thread
             ((PacmanObject)o).setPlayed();
         for (GameObject o : getAllObjects(GhostObject.class))
             ((PacmanObject)o).setPlayed();
+        
+        System.out.println("Przypisywanie postaci zakończone.");
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -422,15 +440,15 @@ public class Game extends Thread
 //    };
     
     public Callable<Void> callableStartSever = () -> {
-        halt();
+        //halt();
         startServer();
         return null;
     };
 
-    public Callable<Void> callableStartClient = () -> {
-        startClient(ipString.value, portString.value, playerNumber.value);
-        return null;
-    };
+    //public Callable<Void> callableStartClient = () -> {
+        //startClient(ipString.value, portString.value, playerNumber.value);
+        //return null;
+    //};
     
     public void startClient(String addressIP, String port, int playerID){
         /*clientBrain = new _clientV2.ClientBrain(addressIP, port, port + 1,
@@ -441,8 +459,20 @@ public class Game extends Thread
         //while (true){}  // zablokoowanie programu
 
         // TODO - odkomentować poniże dwie linijki i wywalić to co powyżej
-        clientGame = new ClientGame(gameWindow,gameRenderer,playerName.value);
+        clientGame = new ClientGame(gameWindow,gameRenderer,playerName,chosenCharacter);
         clientGame.init();
+        
+        // Jak skończymy działanie klienta, to kasujemy też serwer.
+        if (serverGame != null) {
+            serverGame.stopGame();
+            serverGame = null;
+        }
+        
+        clientGame = null;
+        executor.shutdownNow();
+        executor = Executors.newFixedThreadPool(4);
+        System.out.println("Wracamy do menu.");
+        gotoMenu("server_setup");
     }
 
     protected void  startServer(){
@@ -518,6 +548,8 @@ public class Game extends Thread
     // Pola obiektu.
     //////////////////////////////////////////////////////////////////////
     
+    static boolean isJar;
+    
     // Podstawowe rzeczy do gry.
     ArrayList<GameObject> objectList;
     
@@ -531,7 +563,6 @@ public class Game extends Thread
     
     // Podwykonawcy.
     ExecutorService executor = Executors.newFixedThreadPool(4);
-    HashMap<Integer,KeyboardControlRemote> keyboardControlRemote = new HashMap<>();
     KeyboardControl keyboardControl = new KeyboardControl(this);
     MenuControl menuControl = new MenuControl(this);
     Random random = new Random();
@@ -551,14 +582,15 @@ public class Game extends Thread
 
     public IntWrapper startingLives;
     public IntWrapper playersAmount;
+    public IntWrapper ghostsAmount;
     
     public IntWrapper pacmanPlayer;
     public IntWrapper[] ghostPlayer;
     
+    public ArrayList<IntWrapper> characterBlocked;
+    
     int gameScore;
     int gameLives;
-    
-    public IntWrapper isPacmanPlayed;
     
     boolean isPlayedGhostCreated = false;
     boolean listening = false;
@@ -573,6 +605,13 @@ public class Game extends Thread
     _serverV2.ServerBrain serverBrain;
     _clientV2.ClientBrain clientBrain;
     
+    // PO JEDNYM DLA POŁĄCZONEGO GRACZA!!!
+    HashMap <Integer,KeyboardControlRemote> keyboardControlRemote = new HashMap<>();
+    HashMap <Integer,Integer> playerNumbers;
+    HashMap <Integer,String> playerNames;
+    HashMap <Integer,Integer> playerCharacters;
+    HashMap <Integer,Boolean> playerReady;
+    
     //////////////////////////////////////////////////////////////////////
     // Akcesory i inne śmieci.
     //////////////////////////////////////////////////////////////////////
@@ -583,6 +622,10 @@ public class Game extends Thread
     
     public void setPlayedGhostCreated(boolean is){
         isPlayedGhostCreated = is;
+    }
+    
+    public boolean isRunning(){
+        return running;
     }
     
     public void close(){
@@ -606,11 +649,11 @@ public class Game extends Thread
         return startingLives.value;
     }
     
-    public boolean isPacmanPlayed(){
-        return (isPacmanPlayed.value == 0);
+    public int getNumberOfGhosts(){
+        return ghostsAmount.value;
     }
     
-    public int getNumberOfGhosts(){
+    public int getMaxPlayers(){
         return playersAmount.value;
     }
     
@@ -646,5 +689,22 @@ public class Game extends Thread
     
     public ExecutorService getExecutor() {
         return executor;
+    }
+    
+    public ArrayList<Integer> getPlayerIds() {
+        ArrayList<Integer> sortedIds = new ArrayList<>();
+        for (int id : playerNumbers.keySet()) {
+            if (playerReady.get(id) == true)
+                sortedIds.add(/*playerNumbers.get(id),*/id);
+        }
+        return sortedIds;
+    }
+    
+    public String getPlayerName(int id) {
+        return playerNames.get(id);
+    }
+    
+    public int getPlayerCharacter(int id) {
+        return playerCharacters.get(id);
     }
 }

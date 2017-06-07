@@ -45,7 +45,7 @@ public class ServerSender extends Thread {
                 //      ZA WYSŁANIE CO 3sek. DANYCH DO KLIENTÓW                 //
                 //      KIEDY WSZYCY KLIENCI NIE SĄ PODŁĄCZENI                  //
                 //////////////////////////////////////////////////////////////////
-                if(!ServerBrain.checkIfAllClientsAreConnected() && pseudoTimer > 3000){
+                if(!ServerBrain.checkIfAllClientsAreConnected() && pseudoTimer > 10){
                     out.reset();
 
                     ServerBrain.packOut.setNotConnectedClients(ServerBrain.notConnectedClients);

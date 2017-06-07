@@ -114,7 +114,7 @@ public class MenuObject extends GameObject implements Serializable {
         {
             return (((c >= 'a') && (c <= 'z'))
                 || ((c >= 'A') && (c <= 'Z'))
-                || ((c >= '0') && (c <= '9')));
+                || ((c >= '0') && (c <= '9')) || (c == '.'));
         }
         
         protected int limit;
@@ -139,8 +139,34 @@ public class MenuObject extends GameObject implements Serializable {
             this.rightBound = rbound;
         }
         
+        public void setMenuOption(String name, Callable function, IntWrapper value, ArrayList<IntWrapper> blocked,
+                int lbound, int rbound) {
+            super.setMenuOption(name, function);
+            this.valueWrapper = value;
+            this.leftBound = lbound;
+            this.rightBound = rbound;
+            this.blocked = blocked;
+        }
+        
         public void addValue(int x) {
+            int tmp = valueWrapper.value;
             valueWrapper.value += x;
+            
+            if (valueWrapper.value > rightBound) valueWrapper.value = rightBound;
+            if (valueWrapper.value < leftBound) valueWrapper.value = leftBound;
+            int antiBlockCounter = 0;
+            
+            if (blocked != null) 
+                while (blocked.get(valueWrapper.value).value == 1) {
+                    valueWrapper.value += (x>0)?1:-1;
+                    if (antiBlockCounter++ > 100) break;
+                    if (((spinnerFull("left")) && (x < 0))
+                    && ((spinnerFull("right")) && (x > 0))) {
+                        valueWrapper.value = tmp;
+                        break;
+                    }
+                }
+            
             if (valueWrapper.value > rightBound) valueWrapper.value = rightBound;
             if (valueWrapper.value < leftBound) valueWrapper.value = leftBound;
         }
@@ -149,13 +175,37 @@ public class MenuObject extends GameObject implements Serializable {
             return valueWrapper.value;
         }
         
+        public int getBlocked(int i) {
+            if (blocked == null) return 0;
+            return blocked.get(i).value;
+        }
+        
         public boolean spinnerFull(String dir) {
-            if (dir.equals("left")) return (valueWrapper.value == leftBound);
-            if (dir.equals("right")) return (valueWrapper.value == rightBound);
+            // Blocking certain options.
+            if (blocked != null) {
+                for (int i = leftBound; i <= rightBound; i++)
+                    if (blocked.get(i).value == 0) {
+                        leftBound = i;
+                        break;
+                    }
+                for (int i = rightBound; i >= leftBound; i--)
+                    if (blocked.get(i).value == 0) {
+                        rightBound = i;
+                        break;
+                    }
+                //System.out.println(leftBound + " " + rightBound);
+            }
+            
+            if (valueWrapper.value > rightBound) valueWrapper.value = rightBound;
+            if (valueWrapper.value < leftBound) valueWrapper.value = leftBound;
+            
+            if (dir.equals("left")) return (valueWrapper.value <= leftBound);
+            if (dir.equals("right")) return (valueWrapper.value >= rightBound);
             
             return false;
         }
         
+        protected ArrayList<IntWrapper> blocked;
         protected IntWrapper valueWrapper;
         protected int leftBound, rightBound;
     }
@@ -169,6 +219,16 @@ public class MenuObject extends GameObject implements Serializable {
             this.valueWrapper = value;
             this.leftBound = lbound;
             this.rightBound = rbound;
+            this.sprites = sprites;
+        }
+        
+        public void setMenuOption(String name, Callable function, IntWrapper value, ArrayList<IntWrapper> blocked,
+                int lbound, int rbound, ArrayList<Sprite> sprites) {
+            super.setMenuOption(name, function);
+            this.valueWrapper = value;
+            this.leftBound = lbound;
+            this.rightBound = rbound;
+            this.blocked = blocked;
             this.sprites = sprites;
         }
         
@@ -221,6 +281,11 @@ public class MenuObject extends GameObject implements Serializable {
             firstStep = false;
         }
         
+        counter++;
+        
+        if (counter < 5)
+            return;
+        
         // Kontrola opcji.
         MenuOption m = myOptions.get(cursorPos);
         
@@ -234,6 +299,17 @@ public class MenuObject extends GameObject implements Serializable {
                 s.value = s.value.substring(0,s.value.length()-1);
             else if ((c != 0) && (oo.canAcceptChar(c)) && (s.value.length() < oo.getLimit()))
                 s.value += c;
+        }
+        
+        // Blokowanie numerków.
+        if (m instanceof SpinnerOption) {
+            SpinnerOption s = (SpinnerOption)m;
+            while (s.getBlocked(s.getValue()) == 1) {
+                if (s.spinnerFull("left"))
+                    s.addValue(1);
+                else
+                    s.addValue(-1);
+            }
         }
         
         // Wybór opcji za pomocą Enter.
@@ -257,15 +333,15 @@ public class MenuObject extends GameObject implements Serializable {
         }
         
         // Ukryte opcje.
-        for (int i = 0; i < hiddenOptions.size(); i ++) {
-            MenuOption o = hiddenOptions.get(i);
-            if ((o instanceof ButtonPressOption)
-            && (game.keyboardCheck(((ButtonPressOption)o).getButton()))
-            && (!game.keyboardHoldCheck(((ButtonPressOption)o).getButton())))
-                select(o);
+        if (!(m instanceof StringInputOption)) {
+            for (int i = 0; i < hiddenOptions.size(); i ++) {
+                MenuOption o = hiddenOptions.get(i);
+                if ((o instanceof ButtonPressOption)
+                && (game.keyboardCheck(((ButtonPressOption)o).getButton()))
+                && (!game.keyboardHoldCheck(((ButtonPressOption)o).getButton())))
+                    select(o);
+            }
         }
-        
-        counter++;
     }
 
     @Override
@@ -352,6 +428,13 @@ public class MenuObject extends GameObject implements Serializable {
                 IntWrapper value, int lbound, int rbound, ArrayList<Sprite> sprites) {
         ImageSpinnerOption o = new ImageSpinnerOption();
         o.setMenuOption(name,newFunction,value,lbound,rbound,sprites);
+        myOptions.add(o);
+    }
+    
+    public void addImageSpinnerOption(String name, Callable newFunction, ArrayList<IntWrapper> blocked,
+                IntWrapper value, int lbound, int rbound, ArrayList<Sprite> sprites) {
+        ImageSpinnerOption o = new ImageSpinnerOption();
+        o.setMenuOption(name,newFunction,value,blocked,lbound,rbound,sprites);
         myOptions.add(o);
     }
     
