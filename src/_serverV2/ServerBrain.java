@@ -80,8 +80,9 @@ public class ServerBrain extends Thread {
         Thread.sleep(150);
     }
 
+    //public static boolean forceStart = false;
     public synchronized static boolean checkIfAllClientsAreConnected() {
-        return clientList.size() == clientAmount;
+        return (clientList.size() == clientAmount);// || (forceStart));
     }
 
     public synchronized static boolean checkIfPackWasSendByThisThread(int threadID){

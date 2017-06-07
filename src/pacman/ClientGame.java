@@ -116,7 +116,7 @@ public class ClientGame extends Game {
             while ((System.currentTimeMillis() > nextStep) && (loops < max_render_skip)) {
                 sendInput();
                 receiveObjects();
-                if (!ready) gameStep();
+                /*if (!ready)*/ gameStep();
                 
                 nextStep += framesSkip;
                 globalCounter ++;

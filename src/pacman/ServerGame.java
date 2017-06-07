@@ -221,6 +221,8 @@ public class ServerGame extends Game {
             for (int i = 0; i < 4; i++)
                 ghostPlayer[i].value = -1;
             
+            //ServerBrain.forceStart = true;
+            
             for (Integer id : playerNumbers.keySet()){
                 System.out.println("Gracz " + id + " - " + playerCharacters.get(id));
                 chosenCharacter.value = playerCharacters.get(id);
