@@ -26,12 +26,12 @@ public class ClientSender extends Thread {
 		) {
             //System.out.println("Wątek wysłający klienta podłączony do adresu: " + hostName);
             while (true){
-                Thread.sleep(10);
-                out.flush();
+                Thread.sleep(5*1000/60);
                 if(!packOut.isEquals(prevPackOut)){
+                    out.flush();
                     prevPackOut = packOut.copy();
                     out.writeUnshared(packOut);
-                    out.flush();
+                    //out.flush();
                 }
             }
 		} catch (UnknownHostException e) {

@@ -9,7 +9,7 @@ public class ServerSender extends Thread {
 
 	private Socket socket = null;
 	protected boolean loopdaloop = true;
-	private final int DELAY = 1;
+	private final int DELAY = 1000/60;//1;
     private int thradID;
 
 	
@@ -27,8 +27,8 @@ public class ServerSender extends Thread {
                     int pseudoTimer = 0;
                     System.out.println("ServerSender in thread " + thradID + " estabilished.");
 		while (loopdaloop) {
-                    out.flush();
-                    if(!ServerBrain.checkIfPackWasSendByThisThread(thradID)){
+                    //out.flush();
+                    /*if(!ServerBrain.checkIfPackWasSendByThisThread(thradID)){
                         out.reset();
 
                         //ServerBrain.packOut.setAdditionalInfo(temp);
@@ -38,14 +38,14 @@ public class ServerSender extends Thread {
                         out.flush();
                         ServerBrain.lockBufferingToSendByThisThread(thradID);
                         ServerBrain.thisThreadReadPackToSend(thradID);  // readPrevPack = false;
-                }
+                }*/
                 //////////////////////////////////////////////////////////////////
                 //      UWGAA - POD ŻADNYM POZOREM NIE WYWALAĆ STĄD             //
                 //      PONIŻSZEGO IF-A. JEST ON ODPOWIEDZILANY                 //
                 //      ZA WYSŁANIE CO 3sek. DANYCH DO KLIENTÓW                 //
                 //      KIEDY WSZYCY KLIENCI NIE SĄ PODŁĄCZENI                  //
                 //////////////////////////////////////////////////////////////////
-                if(!ServerBrain.checkIfAllClientsAreConnected() && pseudoTimer > 10){
+                if(!ServerBrain.checkIfAllClientsAreConnected()){//) && pseudoTimer > 1000/60){
                     out.reset();
 
                     ServerBrain.packOut.setNotConnectedClients(ServerBrain.notConnectedClients);
@@ -62,7 +62,7 @@ public class ServerSender extends Thread {
                     pseudoTimer = 0;
                 }
 				Thread.sleep(DELAY);
-                pseudoTimer++;
+                //pseudoTimer++;
 			}
 
 		} catch (IOException e) {

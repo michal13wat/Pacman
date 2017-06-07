@@ -208,7 +208,8 @@ public class ServerGame extends Game {
         }
         
         allReady = (playerNumbers.size() > 0);
-        for (Integer id : playerNumbers.keySet()){
+        for (Integer id : playerReady.keySet()){
+            
             if (!playerReady.get(id))
                 allReady = false;
         }
