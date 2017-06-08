@@ -263,7 +263,7 @@ public class MenuControl {
             return 1;
         });
         
-        menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 1, 4);
+        //menu.addSpinnerOption("Plrs Amout: ", null, game.playersAmount, 1, 4);
         menu.addStringInputOption("Name: ", null, game.playerName, null, 7);
         menu.addNumberInputOption("Port: ",null,Game.portString,null,5);
 

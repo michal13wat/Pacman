@@ -89,6 +89,9 @@ O czym zapomnia³em a dodam w kolejnej wersji:
 Uwagai:
 - jak bêdziecie coœ zmieniaæ, i je¿eli te wypisy w konsoli bêd¹ Wam przeszkadza³y, to proszê
   nie usuwajcie ich, tylko wykomentujcie, bo mo¿liwe, ¿e mi jeszcze bêd¹ potem potrzebne
+- pod³¹czanie klientów, uruchamianie serwera trwa z regu³y ko³o 10 sekund. wiêc jak 
+  klikniecie start lub join i gra siê "zablokuje", to nie wy³¹czajcie tego od razu,
+  bo to siê tak d³ugo uruchamia...
 
 
 
