@@ -176,6 +176,8 @@ public class ServerGame extends Game {
         for (PackToSendToServer pack : ServerBrain.recPacks)
             putToArrayDataReceivedFromServer(pack);
         
+        ArrayList<Integer> servedIds = new ArrayList<>();
+        
         for (PackToSendToServer pack : arrayWithDataFromPlayers){
             if ((!playerNumbers.containsKey(pack.getPlayersId())) && (pack.getPlayersId() > 0)) {
                 // NOWY GRACZ SIĘ PODŁĄCZYŁ!!!
@@ -195,8 +197,9 @@ public class ServerGame extends Game {
                 System.out.println("new remote keyboard - " + i);
             }
            
-            System.out.print("SERWER " + ((allReady) ? ("[OK] ") : "") + "- name = " + pack.getPlayersName() + ((pack.isPlayerReady()) ? (" [OK] ") : "")
-            + " id = " + pack.getPlayersId() + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
+            servedIds.add(pack.getPlayersId());
+            //System.out.print("SERWER " + ((allReady) ? ("[OK] ") : "") + "- name = " + pack.getPlayersName() + ((pack.isPlayerReady()) ? (" [OK] ") : "")
+            //+ " id = " + pack.getPlayersId() + " character = " + pack.getCharacter() + ", pressedKey = " + pack.getPressedKey() + "\n");
             
             if (pack.isPlayerReady() == true)
                 playerReady.put(pack.getPlayersId(), true);
@@ -209,6 +212,13 @@ public class ServerGame extends Game {
         
         allReady = (playerNumbers.size() > 0);
         for (Integer id : playerReady.keySet()){
+            
+            System.out.print("SERWER " + ((allReady) ? ("[OK] ") : "") + "- name = " + playerNames.get(id) + ((playerReady.get(id)) ? (" [OK] ") : "")
+            + " id = " + id + " character = " + playerCharacters.get(id)/* + ", pressedKey = " + pack.getPressedKey() + "\n"*/);
+            
+            if (servedIds.contains(id)) System.out.println(" [RECV]");
+            
+            System.out.println("\n");
             
             if (!playerReady.get(id))
                 allReady = false;
