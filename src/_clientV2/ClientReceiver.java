@@ -22,14 +22,18 @@ public class ClientReceiver extends Thread {
 				ObjectInputStream in = new ObjectInputStream(brcSocket.getInputStream());
 
 		) {
-			while (broadcastListening) {
+			while (broadcastListening) { try {
 				_clientV2.ClientBrain.recPac = (clientAndServer.PackReceivedFromServer)in.readObject();
                 _clientV2.ClientBrain.writeToBufConnClients(ClientBrain.recPac.getConnectedClients(),
                         ClientBrain.recPac.getNotConnectedClients());
-                receivedPackagesCounter++;
-                System.out.print(_clientV2.ClientBrain.recPac.getAdditionalInfo() + "\t\t Odebrano pakietów: "
+                receivedPackagesCounter++; }
+                         catch (Exception e) {
+			//receive data
+			e.printStackTrace();
+		}
+                /*System.out.print(_clientV2.ClientBrain.recPac.getAdditionalInfo() + "\t\t Odebrano pakietów: "
                         + receivedPackagesCounter + "\t\tConnected Clients: ");
-                /*for (int i = 0; i < _clientV2.ClientBrain.recPac.getConnectedClients().size(); i++){
+                for (int i = 0; i < _clientV2.ClientBrain.recPac.getConnectedClients().size(); i++){
                     System.out.print(_clientV2.ClientBrain.recPac.getConnectedClients().get(i));
                 }
                 System.out.print(" Not connected clientes: "
@@ -42,9 +46,6 @@ public class ClientReceiver extends Thread {
 			System.err.println("Couldn't get I/O for the connection to " + hostName + " at BrcCl");
 //			data = null;
 			broadcastListening = false;
-		} catch (ClassNotFoundException e) {
-			//receive data
-			e.printStackTrace();
 		}
 		System.out.println("BREC ENDING");
 
