@@ -212,17 +212,14 @@ public class ServerGame extends Game {
         
         allReady = (playerNumbers.size() > 0);
         for (Integer id : playerReady.keySet()){
-<<<<<<< HEAD
-=======
             
             System.out.print("SERWER " + ((allReady) ? ("[OK] ") : "") + "- name = " + playerNames.get(id) + ((playerReady.get(id)) ? (" [OK] ") : "")
             + " id = " + id + " character = " + playerCharacters.get(id)/* + ", pressedKey = " + pack.getPressedKey() + "\n"*/);
             
-            if (servedIds.contains(id)) System.out.println(" [RECV]");
+            if (servedIds.contains(id)) System.out.print(" [RECV]");
             
-            System.out.println("\n");
-            
->>>>>>> 3b3557dc3a05c85b3c207f91006196031452faf4
+            System.out.print("\n");
+
             if (!playerReady.get(id))
                 allReady = false;
         }

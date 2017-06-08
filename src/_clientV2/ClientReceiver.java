@@ -1,5 +1,6 @@
 package _clientV2;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -27,10 +28,16 @@ public class ClientReceiver extends Thread {
                 _clientV2.ClientBrain.writeToBufConnClients(ClientBrain.recPac.getConnectedClients(),
                         ClientBrain.recPac.getNotConnectedClients());
                 receivedPackagesCounter++; }
-                         catch (Exception e) {
-			//receive data
-			e.printStackTrace();
-		}
+
+                catch (EOFException e) {
+                        System.err.println("EOF");
+            //			data = null;
+                        broadcastListening = false;
+                }
+                 catch (NullPointerException | ClassNotFoundException e) {
+                    //receive data
+                         e.printStackTrace();
+		        }
                 /*System.out.print(_clientV2.ClientBrain.recPac.getAdditionalInfo() + "\t\t Odebrano pakietów: "
                         + receivedPackagesCounter + "\t\tConnected Clients: ");
                 for (int i = 0; i < _clientV2.ClientBrain.recPac.getConnectedClients().size(); i++){
